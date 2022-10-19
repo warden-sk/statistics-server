@@ -7,7 +7,6 @@ import { WebSocketServer } from 'ws';
 import report from './report';
 import CookieStorage from './helpers/CookieStorage';
 import KnownClientStorage from './helpers/KnownClientStorage';
-import type { Client } from './helpers/ClientStorage';
 import ClientStorage from './helpers/ClientStorage';
 import HistoryStorage from './helpers/HistoryStorage';
 
@@ -20,30 +19,24 @@ declare module 'http' {
   }
 }
 
-const clientStorage = new ClientStorage();
-const historyStorage = new HistoryStorage();
 const knownClientStorage = new KnownClientStorage();
-
 knownClientStorage.add({ id: '1666188291859', name: 'Marek Kobida' });
+
+const clientStorage = new ClientStorage(knownClientStorage);
+const historyStorage = new HistoryStorage();
 
 /**/
 
-function sendMessage(client: Client, json: [string, any]) {
-  report(2, '[Message]', `"${knownClientStorage.row(client.id)?.name ?? client.id}"`, json);
-
-  client.ws.send(JSON.stringify(json));
-}
-
 function update() {
   clientStorage.rows().forEach(client => {
-    if (knownClientStorage.has(client.id)) {
-      sendMessage(client, ['CLIENTS', clientStorage.size()]);
-      sendMessage(client, ['HISTORY', historyStorage.rows()]);
+    if (client.isKnown) {
+      client.ws.send(JSON.stringify(['CLIENTS', clientStorage.size()]));
+      client.ws.send(JSON.stringify(['HISTORY', historyStorage.rows()]));
     }
   });
 }
 
-setInterval(update, 2500);
+setInterval(update, 1000);
 
 wss.on('headers', (headers, request) => {
   const cookieStorage = new CookieStorage();
@@ -75,8 +68,6 @@ wss.on('connection', (ws, request) => {
 
     if (client) {
       client.ws.close();
-
-      clientStorage.delete(request.clientId);
     }
   });
 
@@ -88,29 +79,28 @@ wss.on('connection', (ws, request) => {
     if (Array.isArray(input) && input.length === 2) {
       const [commandName, json] = input;
 
-      report(
-        1,
-        '[Command]',
-        `"${knownClientStorage.row(request.clientId)?.name ?? request.clientId}"`,
-        `"${commandName}"`,
-        json
-      );
+      if (typeof commandName === 'string') {
+        report(
+          1,
+          '[Command]',
+          `"${knownClientStorage.row(request.clientId)?.name ?? request.clientId}"`,
+          `"${commandName}"`,
+          json
+        );
 
-      if (commandName === 'CLIENT_UPDATE_URL') {
-        clientStorage.update({ id: request.clientId, url: json.url });
+        if (commandName === 'CLIENT_UPDATE_URL') {
+          clientStorage.update({ id: request.clientId, url: json.url });
 
-        historyStorage.add({
-          clientAddress: request.socket.remoteAddress!,
-          clientId: request.clientId,
-          id: (+new Date()).toString(),
-          url: json.url,
-        });
-      }
+          historyStorage.add({ clientId: request.clientId, id: (+new Date()).toString(), url: json.url });
+        }
 
-      if (commandName === 'TEST') {
-        clientStorage
-          .rows()
-          .forEach(client => sendMessage(client, ['TEST', { createdAt: +new Date(), message: json.message }]));
+        if (commandName === 'TEST') {
+          clientStorage
+            .rows()
+            .forEach(client =>
+              client.ws.send(JSON.stringify(['TEST', { createdAt: +new Date(), message: json.message }]))
+            );
+        }
       }
     }
   });

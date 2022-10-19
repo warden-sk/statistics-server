@@ -6,7 +6,6 @@ import type { FileStorageRow } from './FileStorage';
 import FileStorage from './FileStorage';
 
 export interface History extends FileStorageRow {
-  clientAddress: string;
   clientId: string;
   url: string;
 }

@@ -5,12 +5,43 @@
 import type { WebSocket } from 'ws';
 import type { FileStorageRow } from './FileStorage';
 import FileStorage from './FileStorage';
+import type KnownClientStorage from './KnownClientStorage';
 
 export interface Client extends FileStorageRow {
   url: string;
+}
+
+export interface EnhancedClient extends Client {
+  isKnown: boolean;
   ws: WebSocket;
 }
 
-class ClientStorage extends FileStorage<Client> {}
+class ClientStorage extends FileStorage<Client> {
+  #wss: { [clientId: string]: WebSocket } = {};
+
+  constructor(readonly knownClientStorage: KnownClientStorage) {
+    super();
+  }
+
+  add({ ws, ...client }: Omit<EnhancedClient, 'createdAt' | 'isKnown' | 'updatedAt'>) {
+    super.add(client);
+
+    this.#wss[client.id] = ws;
+  }
+
+  row(id: string): EnhancedClient | undefined {
+    const client = super.row(id);
+
+    if (client) {
+      return { ...client, isKnown: this.knownClientStorage.has(client.id), ws: this.#wss[client.id] };
+    }
+  }
+
+  rows(): EnhancedClient[] {
+    return super
+      .rows()
+      .map(client => ({ ...client, isKnown: this.knownClientStorage.has(client.id), ws: this.#wss[client.id] }));
+  }
+}
 
 export default ClientStorage;
