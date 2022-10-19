@@ -17,8 +17,8 @@ class FileStorage<Row extends FileStorageRow> {
     }
   }
 
-  delete(id: string): Row[] {
-    return (this.#rows = this.#rows.filter(row => row.id !== id));
+  delete(id: string) {
+    this.#rows = this.#rows.filter(row => row.id !== id);
   }
 
   has(id: string): boolean {
@@ -39,8 +39,8 @@ class FileStorage<Row extends FileStorageRow> {
     return this.#rows.length;
   }
 
-  update(json: { [K in keyof Row]?: Row[K] }): Row[] {
-    return (this.#rows = this.#rows.map(row => {
+  update(json: { [K in keyof Row]?: Row[K] }) {
+    this.#rows = this.#rows.map(row => {
       if (row.id === json.id) {
         return {
           ...row,
@@ -53,7 +53,7 @@ class FileStorage<Row extends FileStorageRow> {
       }
 
       return row;
-    }));
+    });
   }
 }
 

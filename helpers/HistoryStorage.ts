@@ -10,6 +10,10 @@ export interface History extends FileStorageRow {
   url: string;
 }
 
-class HistoryStorage extends FileStorage<History> {}
+class HistoryStorage extends FileStorage<History> {
+  add(row: Omit<History, 'createdAt' | 'id' | 'updatedAt'>) {
+    super.add({ ...row, id: (+new Date()).toString() });
+  }
+}
 
 export default HistoryStorage;

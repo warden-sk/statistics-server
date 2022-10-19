@@ -91,7 +91,7 @@ wss.on('connection', (ws, request) => {
         if (commandName === 'CLIENT_UPDATE_URL') {
           clientStorage.update({ id: request.clientId, url: json.url });
 
-          historyStorage.add({ clientId: request.clientId, id: (+new Date()).toString(), url: json.url });
+          historyStorage.add({ clientId: request.clientId, url: json.url });
         }
 
         if (commandName === 'TEST') {
