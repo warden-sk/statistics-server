@@ -6,7 +6,7 @@ import type { WebSocket } from 'ws';
 import type { FileStorageRow } from './FileStorage';
 import FileStorage from './FileStorage';
 
-interface Client extends FileStorageRow {
+export interface Client extends FileStorageRow {
   url: string;
   ws: WebSocket;
 }

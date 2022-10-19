@@ -4,7 +4,7 @@
 
 import report, { ReportType } from '../report';
 
-interface Cookie {
+export interface Cookie {
   Domain?: string;
   HttpOnly?: boolean;
   Path?: string;

@@ -5,7 +5,7 @@
 import type { FileStorageRow } from './FileStorage';
 import FileStorage from './FileStorage';
 
-interface KnownClient extends FileStorageRow {
+export interface KnownClient extends FileStorageRow {
   name: string;
 }
 

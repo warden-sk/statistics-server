@@ -5,7 +5,7 @@
 import type { FileStorageRow } from './FileStorage';
 import FileStorage from './FileStorage';
 
-interface History extends FileStorageRow {
+export interface History extends FileStorageRow {
   url: string;
 }
 

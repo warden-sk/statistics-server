@@ -3,11 +3,11 @@
  */
 
 import http from 'http';
-import type { WebSocket } from 'ws';
 import { WebSocketServer } from 'ws';
 import report from './report';
 import CookieStorage from './helpers/CookieStorage';
 import KnownClientStorage from './helpers/KnownClientStorage';
+import type { Client } from './helpers/ClientStorage';
 import ClientStorage from './helpers/ClientStorage';
 import HistoryStorage from './helpers/HistoryStorage';
 
@@ -26,10 +26,19 @@ const knownClientStorage = new KnownClientStorage();
 
 /**/
 
-function sendMessage(ws: WebSocket, json: any) {
-  report(2, '[Message]', json);
+function sendMessage(client: Client, json: any) {
+  report(2, '[Message]', `"${knownClientStorage.row(client.id)?.name ?? client.id}"`, json);
 
-  ws.send(JSON.stringify(json));
+  client.ws.send(JSON.stringify(json));
+}
+
+function update() {
+  clientStorage.rows().forEach(client => {
+    if (knownClientStorage.has(client.id)) {
+      sendMessage(client, ['CLIENTS', clientStorage.size()]);
+      sendMessage(client, ['HISTORY', historyStorage.rows()]);
+    }
+  });
 }
 
 wss.on('headers', (headers, request) => {
@@ -64,6 +73,8 @@ wss.on('connection', (ws, request) => {
       client.ws.close();
 
       clientStorage.delete(request.clientId);
+
+      update();
     }
   });
 
@@ -86,12 +97,7 @@ wss.on('connection', (ws, request) => {
       if (commandName === 'CLIENT_UPDATE_URL') {
         historyStorage.add({ id: (+new Date()).toString(), url: json.url });
 
-        clientStorage.rows().forEach(client => {
-          if (knownClientStorage.has(request.clientId)) {
-            sendMessage(client.ws, ['CLIENTS', clientStorage.size()]);
-            sendMessage(client.ws, ['HISTORY', historyStorage.rows()]);
-          }
-        });
+        update();
 
         clientStorage.update({ id: request.clientId, url: json.url });
       }
@@ -99,7 +105,7 @@ wss.on('connection', (ws, request) => {
       if (commandName === 'TEST') {
         clientStorage
           .rows()
-          .forEach(client => sendMessage(client.ws, ['TEST', { createdAt: +new Date(), message: json.message }]));
+          .forEach(client => sendMessage(client, ['TEST', { createdAt: +new Date(), message: json.message }]));
       }
     }
   });
