@@ -9,12 +9,6 @@ export interface KnownClient extends FileStorageRow {
   name: string;
 }
 
-class KnownClientStorage extends FileStorage<KnownClient> {
-  constructor() {
-    super();
-
-    this.add({ id: '1666188291859', name: 'Marek Kobida' });
-  }
-}
+class KnownClientStorage extends FileStorage<KnownClient> {}
 
 export default KnownClientStorage;

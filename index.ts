@@ -24,10 +24,12 @@ const clientStorage = new ClientStorage();
 const historyStorage = new HistoryStorage();
 const knownClientStorage = new KnownClientStorage();
 
+knownClientStorage.add({ id: '1666188291859', name: 'Marek Kobida' });
+
 /**/
 
 function sendMessage(client: Client, json: [string, any]) {
-  report(2, '[Message]', `"${knownClientStorage.row(client.id)?.name ?? client.id}"`, json[0]);
+  report(2, '[Message]', `"${knownClientStorage.row(client.id)?.name ?? client.id}"`, json);
 
   client.ws.send(JSON.stringify(json));
 }
@@ -40,6 +42,8 @@ function update() {
     }
   });
 }
+
+setInterval(update, 2500);
 
 wss.on('headers', (headers, request) => {
   const cookieStorage = new CookieStorage();
@@ -73,8 +77,6 @@ wss.on('connection', (ws, request) => {
       client.ws.close();
 
       clientStorage.delete(request.clientId);
-
-      update();
     }
   });
 
@@ -95,11 +97,14 @@ wss.on('connection', (ws, request) => {
       );
 
       if (commandName === 'CLIENT_UPDATE_URL') {
-        historyStorage.add({ id: (+new Date()).toString(), url: json.url });
-
-        update();
-
         clientStorage.update({ id: request.clientId, url: json.url });
+
+        historyStorage.add({
+          clientAddress: request.socket.remoteAddress!,
+          clientId: request.clientId,
+          id: (+new Date()).toString(),
+          url: json.url,
+        });
       }
 
       if (commandName === 'TEST') {
