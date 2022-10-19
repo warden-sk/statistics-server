@@ -26,8 +26,8 @@ const knownClientStorage = new KnownClientStorage();
 
 /**/
 
-function sendMessage(client: Client, json: any) {
-  report(2, '[Message]', `"${knownClientStorage.row(client.id)?.name ?? client.id}"`, json);
+function sendMessage(client: Client, json: [string, any]) {
+  report(2, '[Message]', `"${knownClientStorage.row(client.id)?.name ?? client.id}"`, json[0]);
 
   client.ws.send(JSON.stringify(json));
 }
