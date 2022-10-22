@@ -9,6 +9,8 @@ import CookieStorage from './helpers/CookieStorage';
 import KnownClientStorage from './helpers/KnownClientStorage';
 import ClientStorage from './helpers/ClientStorage';
 import HistoryStorage from './helpers/HistoryStorage';
+import commands from './commands';
+import { isRight } from '@warden-sk/validation/functions';
 
 const server = http.createServer();
 const wss = new WebSocketServer({ server });
@@ -20,7 +22,7 @@ declare module 'http' {
 }
 
 const knownClientStorage = new KnownClientStorage();
-knownClientStorage.add({ id: '1666188291859', name: 'Marek Kobida' });
+knownClientStorage.add({ id: '1666479307132', name: 'Marek Kobida' });
 
 const clientStorage = new ClientStorage(knownClientStorage);
 const historyStorage = new HistoryStorage();
@@ -74,33 +76,31 @@ wss.on('connection', (ws, request) => {
   ws.on('message', data => {
     console.log(new Array(process.stdout.columns + 1).join('\u2014'));
 
-    const input = JSON.parse(data.toString());
+    const input = commands.decode(JSON.parse(data.toString()));
 
-    if (Array.isArray(input) && input.length === 2) {
-      const [commandName, json] = input;
+    if (isRight(input)) {
+      const [commandName, json] = input.right;
 
-      if (typeof commandName === 'string') {
-        report(
-          1,
-          '[Command]',
-          `"${knownClientStorage.row(request.clientId)?.name ?? request.clientId}"`,
-          `"${commandName}"`,
-          json
-        );
+      report(
+        1,
+        '[Command]',
+        `"${knownClientStorage.row(request.clientId)?.name ?? request.clientId}"`,
+        `"${commandName}"`,
+        json
+      );
 
-        if (commandName === 'CLIENT_UPDATE_URL') {
-          clientStorage.update({ id: request.clientId, url: json.url });
+      if (commandName === 'CLIENT_UPDATE_URL') {
+        clientStorage.update({ id: request.clientId, url: json.url });
 
-          historyStorage.add({ clientId: request.clientId, url: json.url });
-        }
+        historyStorage.add({ clientId: request.clientId, url: json.url });
+      }
 
-        if (commandName === 'TEST') {
-          clientStorage
-            .rows()
-            .forEach(client =>
-              client.ws.send(JSON.stringify(['TEST', { createdAt: +new Date(), message: json.message }]))
-            );
-        }
+      if (commandName === 'TEST') {
+        clientStorage
+          .rows()
+          .forEach(client =>
+            client.ws.send(JSON.stringify(['TEST', { createdAt: +new Date(), message: json.message }]))
+          );
       }
     }
   });
