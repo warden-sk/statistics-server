@@ -13,7 +13,7 @@ class KnownClientStorage extends FileStorage<KnownClient> {
   constructor() {
     super();
 
-    this.add({ id: '1666479307132', name: 'Marek Kobida' });
+    this.add({ id: '1666567292349', name: 'Marek Kobida' });
   }
 }
 

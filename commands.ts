@@ -12,13 +12,15 @@ export const CLIENT_STORAGE = new t.TupleType([new t.LiteralType('CLIENT_STORAGE
 
 export const HISTORY_STORAGE = new t.TupleType([
   new t.LiteralType('HISTORY_STORAGE'),
-  new t.IntersectionType([
-    FILE_STORAGE_ROW,
-    new t.InterfaceType({
-      clientId: new t.StringType(),
-      url: new t.StringType(),
-    }),
-  ]),
+  new t.ArrayType(
+    new t.IntersectionType([
+      FILE_STORAGE_ROW,
+      new t.InterfaceType({
+        clientId: new t.StringType(),
+        url: new t.StringType(),
+      }),
+    ])
+  ),
 ]);
 
 export const MESSAGE_TO_CLIENT = new t.TupleType([
@@ -28,6 +30,8 @@ export const MESSAGE_TO_CLIENT = new t.TupleType([
     message: new t.StringType(),
   }),
 ]);
+
+export const commandsFromServer = new t.UnionType([CLIENT_STORAGE, HISTORY_STORAGE, MESSAGE_TO_CLIENT]);
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -45,6 +49,4 @@ const UPDATE = new t.TupleType([
   }),
 ]);
 
-const commands = new t.UnionType([MESSAGE_FROM_CLIENT, UPDATE]);
-
-export default commands;
+export const commandsFromClient = new t.UnionType([MESSAGE_FROM_CLIENT, UPDATE]);

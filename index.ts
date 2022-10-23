@@ -7,10 +7,12 @@ import { WebSocketServer } from 'ws';
 import report from './report';
 import CookieStorage from './helpers/CookieStorage';
 import KnownClientStorage from './helpers/KnownClientStorage';
+import type { EnhancedClient } from './helpers/ClientStorage';
 import ClientStorage from './helpers/ClientStorage';
 import HistoryStorage from './helpers/HistoryStorage';
-import commands from './commands';
-import { isRight } from '@warden-sk/validation/functions';
+import { commandsFromClient, commandsFromServer } from './commands';
+import { isLeft, isRight } from '@warden-sk/validation/functions';
+import type { TypeOf } from '@warden-sk/validation/types';
 
 const server = http.createServer();
 const wss = new WebSocketServer({ server });
@@ -31,13 +33,13 @@ const historyStorage = new HistoryStorage();
 function update() {
   clientStorage.rows().forEach(client => {
     if (client.isKnown) {
-      client.ws.send(JSON.stringify(['CLIENT_STORAGE', clientStorage.size()]));
-      client.ws.send(JSON.stringify(['HISTORY_STORAGE', historyStorage.rows()]));
+      sendCommand(['CLIENT_STORAGE', clientStorage.size()], client);
+      sendCommand(['HISTORY_STORAGE', historyStorage.rows()], client);
     }
   });
 }
 
-setInterval(update, 1000);
+setInterval(update, 2500);
 
 wss.on('headers', (headers, request) => {
   const cookieStorage = new CookieStorage();
@@ -61,6 +63,20 @@ wss.on('headers', (headers, request) => {
   request.clientId = clientId;
 });
 
+function sendCommand(command: TypeOf<typeof commandsFromServer>, client: EnhancedClient) {
+  const validation = commandsFromServer.decode(command);
+
+  if (isLeft(validation)) {
+    report(undefined, '[Command]', 'The command is not valid.');
+  }
+
+  if (isRight(validation)) {
+    report(2, '[Command]', `The command "${validation.right[0]}" is valid.`);
+
+    client.ws.send(JSON.stringify(validation.right));
+  }
+}
+
 wss.on('connection', (ws, request) => {
   clientStorage.add({ id: request.clientId, url: request.url!, ws });
 
@@ -75,7 +91,7 @@ wss.on('connection', (ws, request) => {
   ws.on('message', data => {
     console.log(new Array(process.stdout.columns + 1).join('\u2014'));
 
-    const input = commands.decode(JSON.parse(data.toString()));
+    const input = commandsFromClient.decode(JSON.parse(data.toString()));
 
     if (isRight(input)) {
       const [commandName, json] = input.right;
@@ -91,9 +107,7 @@ wss.on('connection', (ws, request) => {
       if (commandName === 'MESSAGE') {
         clientStorage
           .rows()
-          .forEach(client =>
-            client.ws.send(JSON.stringify(['MESSAGE', { createdAt: +new Date(), message: json.message }]))
-          );
+          .forEach(client => sendCommand(['MESSAGE', { createdAt: +new Date(), message: json.message }], client));
       }
 
       if (commandName === 'UPDATE') {
