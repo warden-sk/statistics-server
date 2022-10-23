@@ -2,10 +2,10 @@
  * Copyright 2022 Marek Kobida
  */
 
+import commandsFromServer from '../commandsFromServer';
 import report from '../report';
 import type { EnhancedClient } from './ClientStorage';
 import type { TypeOf } from '@warden-sk/validation/types';
-import { commandsFromServer } from '../commands';
 import { isLeft, isRight } from '@warden-sk/validation/functions';
 
 function sendCommand(command: TypeOf<typeof commandsFromServer>, client: EnhancedClient) {

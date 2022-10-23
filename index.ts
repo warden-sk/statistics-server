@@ -6,11 +6,11 @@ import ClientStorage from './helpers/ClientStorage';
 import CookieStorage from './helpers/CookieStorage';
 import HistoryStorage from './helpers/HistoryStorage';
 import KnownClientStorage from './helpers/KnownClientStorage';
+import commandsFromClient from './commandsFromClient';
 import http from 'http';
 import report from './report';
 import sendCommand from './helpers/sendCommand';
 import { WebSocketServer } from 'ws';
-import { commandsFromClient } from './commands';
 import { isRight } from '@warden-sk/validation/functions';
 
 const server = http.createServer();

@@ -1,3 +1,7 @@
+/*
+ * Copyright 2022 Marek Kobida
+ */
+
 import * as t from '@warden-sk/validation';
 
 export const STORAGE_ROW = new t.InterfaceType({
@@ -6,7 +10,7 @@ export const STORAGE_ROW = new t.InterfaceType({
   updatedAt: new t.NumberType(),
 });
 
-//--------------------------------------------------------------------------------------------------------------- Server
+//----------------------------------------------------------------------------------------------------------------------
 
 export const CLIENT_STORAGE_ROW = new t.IntersectionType([
   STORAGE_ROW,
@@ -19,6 +23,8 @@ export const CLIENT_STORAGE = new t.TupleType([
   new t.LiteralType('CLIENT_STORAGE'),
   new t.ArrayType(CLIENT_STORAGE_ROW),
 ]);
+
+//----------------------------------------------------------------------------------------------------------------------
 
 export const HISTORY_STORAGE_ROW = new t.IntersectionType([
   STORAGE_ROW,
@@ -33,6 +39,8 @@ export const HISTORY_STORAGE = new t.TupleType([
   new t.ArrayType(HISTORY_STORAGE_ROW),
 ]);
 
+//----------------------------------------------------------------------------------------------------------------------
+
 export const MESSAGE_TO_CLIENT = new t.TupleType([
   new t.LiteralType('MESSAGE'),
   new t.InterfaceType({
@@ -41,22 +49,6 @@ export const MESSAGE_TO_CLIENT = new t.TupleType([
   }),
 ]);
 
-export const commandsFromServer = new t.UnionType([CLIENT_STORAGE, HISTORY_STORAGE, MESSAGE_TO_CLIENT]);
+const commandsFromServer = new t.UnionType([CLIENT_STORAGE, HISTORY_STORAGE, MESSAGE_TO_CLIENT]);
 
-//--------------------------------------------------------------------------------------------------------------- Client
-
-const MESSAGE_FROM_CLIENT = new t.TupleType([
-  new t.LiteralType('MESSAGE'),
-  new t.InterfaceType({
-    message: new t.StringType(),
-  }),
-]);
-
-const UPDATE = new t.TupleType([
-  new t.LiteralType('UPDATE'),
-  new t.InterfaceType({
-    url: new t.StringType(),
-  }),
-]);
-
-export const commandsFromClient = new t.UnionType([MESSAGE_FROM_CLIENT, UPDATE]);
+export default commandsFromServer;
