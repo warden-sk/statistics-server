@@ -2,17 +2,16 @@
  * Copyright 2022 Marek Kobida
  */
 
-import http from 'http';
-import { WebSocketServer } from 'ws';
-import report from './report';
-import CookieStorage from './helpers/CookieStorage';
-import KnownClientStorage from './helpers/KnownClientStorage';
-import type { EnhancedClient } from './helpers/ClientStorage';
 import ClientStorage from './helpers/ClientStorage';
+import CookieStorage from './helpers/CookieStorage';
 import HistoryStorage from './helpers/HistoryStorage';
-import { commandsFromClient, commandsFromServer } from './commands';
-import { isLeft, isRight } from '@warden-sk/validation/functions';
-import type { TypeOf } from '@warden-sk/validation/types';
+import KnownClientStorage from './helpers/KnownClientStorage';
+import http from 'http';
+import report from './report';
+import sendCommand from './helpers/sendCommand';
+import { WebSocketServer } from 'ws';
+import { commandsFromClient } from './commands';
+import { isRight } from '@warden-sk/validation/functions';
 
 const server = http.createServer();
 const wss = new WebSocketServer({ server });
@@ -62,18 +61,6 @@ wss.on('headers', (headers, request) => {
 
   request.clientId = clientId;
 });
-
-function sendCommand(command: TypeOf<typeof commandsFromServer>, client: EnhancedClient) {
-  const validation = commandsFromServer.decode(command);
-
-  if (isLeft(validation)) {
-    report(undefined, '[Command]', 'The command is not valid.');
-  }
-
-  if (isRight(validation)) {
-    client.ws.send(JSON.stringify(validation.right));
-  }
-}
 
 wss.on('connection', (ws, request) => {
   clientStorage.add({ id: request.clientId, url: request.url!, ws });

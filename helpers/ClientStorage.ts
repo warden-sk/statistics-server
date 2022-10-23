@@ -2,10 +2,10 @@
  * Copyright 2022 Marek Kobida
  */
 
-import type { WebSocket } from 'ws';
 import type { FileStorageRow } from './FileStorage';
 import FileStorage from './FileStorage';
 import type KnownClientStorage from './KnownClientStorage';
+import type { WebSocket } from 'ws';
 
 export interface Client extends FileStorageRow {
   url: string;
