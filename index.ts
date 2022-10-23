@@ -22,7 +22,6 @@ declare module 'http' {
 }
 
 const knownClientStorage = new KnownClientStorage();
-knownClientStorage.add({ id: '1666479307132', name: 'Marek Kobida' });
 
 const clientStorage = new ClientStorage(knownClientStorage);
 const historyStorage = new HistoryStorage();
@@ -32,8 +31,8 @@ const historyStorage = new HistoryStorage();
 function update() {
   clientStorage.rows().forEach(client => {
     if (client.isKnown) {
-      client.ws.send(JSON.stringify(['CLIENTS', clientStorage.size()]));
-      client.ws.send(JSON.stringify(['HISTORY', historyStorage.rows()]));
+      client.ws.send(JSON.stringify(['CLIENT_STORAGE', clientStorage.size()]));
+      client.ws.send(JSON.stringify(['HISTORY_STORAGE', historyStorage.rows()]));
     }
   });
 }
@@ -89,18 +88,18 @@ wss.on('connection', (ws, request) => {
         json
       );
 
-      if (commandName === 'CLIENT_UPDATE_URL') {
-        clientStorage.update({ id: request.clientId, url: json.url });
-
-        historyStorage.add({ clientId: request.clientId, url: json.url });
-      }
-
-      if (commandName === 'TEST') {
+      if (commandName === 'MESSAGE') {
         clientStorage
           .rows()
           .forEach(client =>
-            client.ws.send(JSON.stringify(['TEST', { createdAt: +new Date(), message: json.message }]))
+            client.ws.send(JSON.stringify(['MESSAGE', { createdAt: +new Date(), message: json.message }]))
           );
+      }
+
+      if (commandName === 'UPDATE') {
+        clientStorage.update({ id: request.clientId, url: json.url });
+
+        historyStorage.add({ clientId: request.clientId, url: json.url });
       }
     }
   });
