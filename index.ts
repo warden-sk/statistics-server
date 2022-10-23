@@ -33,13 +33,13 @@ const historyStorage = new HistoryStorage();
 function update() {
   clientStorage.rows().forEach(client => {
     if (client.isKnown) {
-      sendCommand(['CLIENT_STORAGE', clientStorage.size()], client);
+      sendCommand(['CLIENT_STORAGE', clientStorage.rows()], client);
       sendCommand(['HISTORY_STORAGE', historyStorage.rows()], client);
     }
   });
 }
 
-setInterval(update, 2500);
+setInterval(update, 1000);
 
 wss.on('headers', (headers, request) => {
   const cookieStorage = new CookieStorage();
@@ -71,8 +71,6 @@ function sendCommand(command: TypeOf<typeof commandsFromServer>, client: Enhance
   }
 
   if (isRight(validation)) {
-    report(2, '[Command]', `The command "${validation.right[0]}" is valid.`);
-
     client.ws.send(JSON.stringify(validation.right));
   }
 }
