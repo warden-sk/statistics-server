@@ -8,7 +8,7 @@ import HistoryStorage from './helpers/HistoryStorage';
 import KnownClientStorage from './helpers/KnownClientStorage';
 import commandsFromClient from './commandsFromClient';
 import http from 'http';
-import report from './report';
+import report, { ReportType } from './report';
 import sendCommand from './helpers/sendCommand';
 import { WebSocketServer } from 'ws';
 import { isRight } from '@warden-sk/validation/functions';
@@ -32,8 +32,13 @@ const historyStorage = new HistoryStorage();
 function update() {
   clientStorage.rows().forEach(client => {
     if (client.isKnown) {
-      sendCommand(['CLIENT_STORAGE', clientStorage.rows()], client);
-      sendCommand(['HISTORY_STORAGE', historyStorage.rows()], client);
+      sendCommand(
+        [
+          ['CLIENT_STORAGE', clientStorage.rows()],
+          ['HISTORY_STORAGE', historyStorage.rows()],
+        ],
+        client
+      );
     }
   });
 }
@@ -82,7 +87,7 @@ wss.on('connection', (ws, request) => {
       const [commandName, json] = input.right;
 
       report(
-        1,
+        ReportType.IN,
         '[Command]',
         `"${knownClientStorage.row(request.clientId)?.name ?? request.clientId}"`,
         `"${commandName}"`,
@@ -92,12 +97,11 @@ wss.on('connection', (ws, request) => {
       if (commandName === 'MESSAGE') {
         clientStorage
           .rows()
-          .forEach(client => sendCommand(['MESSAGE', { createdAt: +new Date(), message: json.message }], client));
+          .forEach(client => sendCommand([['MESSAGE', { createdAt: +new Date(), message: json.message }]], client));
       }
 
       if (commandName === 'UPDATE') {
         clientStorage.update({ id: request.clientId, url: json.url });
-
         historyStorage.add({ clientId: request.clientId, url: json.url });
       }
     }
