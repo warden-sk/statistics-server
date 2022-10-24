@@ -11,12 +11,6 @@ export interface KnownClient extends FileStorageRow {
 
 class KnownClientStorage extends FileStorage<KnownClient> {
   readonly $: 'KnownClientStorage' = 'KnownClientStorage';
-
-  constructor() {
-    super();
-
-    this.add({ id: '1666567292349', name: 'Marek Kobida' });
-  }
 }
 
 export default KnownClientStorage;

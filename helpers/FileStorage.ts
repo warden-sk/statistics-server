@@ -2,7 +2,8 @@
  * Copyright 2022 Marek Kobida
  */
 
-import report, { ReportType } from '../report';
+import * as fs from 'fs';
+import { json_decode, json_encode } from './json';
 
 export interface FileStorageRow {
   createdAt: number;
@@ -11,57 +12,61 @@ export interface FileStorageRow {
 }
 
 class FileStorage<Row extends FileStorageRow> {
-  #rows: Row[] = [];
+  readonly $!: string;
+
+  #readFile(): Row[] {
+    return json_decode(fs.readFileSync(`./json/${this.$}.json`));
+  }
+
+  #writeFile(on: (rows: Row[]) => Row[]) {
+    const rows = on(this.#readFile());
+
+    fs.writeFileSync(`./json/${this.$}.json`, json_encode(rows));
+  }
+
+  //--------------------------------------------------------------------------------------------------------------------
 
   add(row: Omit<Row, 'createdAt' | 'updatedAt'>) {
     if (!this.has(row.id)) {
-      report(ReportType.IN, '[FileStorage.add]', `"${row.id}"`);
-
-      this.#rows = [...this.#rows, { createdAt: +new Date(), updatedAt: +new Date(), ...row } as Row];
+      this.#writeFile(rows => [...rows, { createdAt: +new Date(), updatedAt: +new Date(), ...row } as Row]);
     }
   }
 
-  #delete(id: string) {
-    this.#rows = this.#rows.filter(row => row.id !== id);
-  }
-
   has(id: string): boolean {
-    return this.#rows.findIndex(row => row.id === id) !== -1;
+    return this.#readFile().findIndex(row => row.id === id) !== -1;
   }
 
   row(id: string): Row | undefined {
-    const i = this.#rows.findIndex(row => row.id === id);
+    const rows = this.#readFile();
+
+    const i = rows.findIndex(row => row.id === id);
 
     if (i !== -1) {
-      const row = this.#rows[i];
-
-      report(ReportType.OUT, '[FileStorage.row]', `"${row.id}"`);
-
-      return row;
+      return rows[i];
     }
   }
 
   rows(): Row[] {
-    return this.#rows;
+    return this.#readFile();
   }
 
   update(json: { [K in keyof Row]?: Row[K] }) {
-    this.#rows = this.#rows.map(row => {
-      if (row.id === json.id) {
-        report(ReportType.IN, '[FileStorage.update]', `"${row.id}"`);
+    this.#writeFile(rows =>
+      rows.map(row => {
+        if (row.id === json.id) {
+          return {
+            ...row,
+            ...json,
+            // not updated
+            createdAt: row.createdAt,
+            id: row.id,
+            updatedAt: +new Date(),
+          };
+        }
 
-        return {
-          ...row,
-          ...json,
-          // not updated
-          createdAt: row.createdAt,
-          id: row.id,
-          updatedAt: +new Date(),
-        };
-      }
-
-      return row;
-    });
+        return row;
+      })
+    );
   }
 }
 
