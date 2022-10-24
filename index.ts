@@ -12,6 +12,7 @@ import report, { ReportType } from './report';
 import sendCommand from './helpers/sendCommand';
 import { WebSocketServer } from 'ws';
 import { isRight } from '@warden-sk/validation/functions';
+import { json_decode } from './helpers/json';
 
 const server = http.createServer();
 const wss = new WebSocketServer({ server });
@@ -79,7 +80,7 @@ wss.on('connection', (ws, request) => {
   ws.on('message', data => {
     console.log(new Array(process.stdout.columns + 1).join('\u2014'));
 
-    const validation = commandsFromClient.decode(JSON.parse(data.toString()));
+    const validation = commandsFromClient.decode(json_decode(data.toString()));
 
     if (isRight(validation)) {
       const [commandName, json] = validation.right;
