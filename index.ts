@@ -43,8 +43,6 @@ function update() {
   });
 }
 
-setInterval(update, 1000);
-
 wss.on('headers', (headers, request) => {
   const cookieStorage = new CookieStorage();
 
@@ -105,6 +103,8 @@ wss.on('connection', (ws, request) => {
         historyStorage.add({ clientId: request.clientId, url: json.url });
       }
     }
+
+    update();
   });
 });
 
