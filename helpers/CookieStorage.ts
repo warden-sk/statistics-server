@@ -51,7 +51,7 @@ class CookieStorage {
     while (($ = pattern.exec(input)) !== null) {
       const [, left, right] = $;
 
-      cookies[left!] = right!;
+      cookies[left] = right;
 
       report(ReportType.IN, '[CookieStorage]', `"${left}"`, `"${right}"`);
     }
