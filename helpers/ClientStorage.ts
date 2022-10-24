@@ -17,6 +17,8 @@ export interface EnhancedClient extends Client {
 }
 
 class ClientStorage extends FileStorage<Client> {
+  readonly $: 'ClientStorage' = 'ClientStorage';
+
   #wss: { [clientId: string]: WebSocket } = {};
 
   constructor(readonly knownClientStorage: KnownClientStorage) {

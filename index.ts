@@ -79,10 +79,10 @@ wss.on('connection', (ws, request) => {
   ws.on('message', data => {
     console.log(new Array(process.stdout.columns + 1).join('\u2014'));
 
-    const input = commandsFromClient.decode(JSON.parse(data.toString()));
+    const validation = commandsFromClient.decode(JSON.parse(data.toString()));
 
-    if (isRight(input)) {
-      const [commandName, json] = input.right;
+    if (isRight(validation)) {
+      const [commandName, json] = validation.right;
 
       report(
         ReportType.IN,

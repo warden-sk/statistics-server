@@ -11,6 +11,8 @@ export interface History extends FileStorageRow {
 }
 
 class HistoryStorage extends FileStorage<History> {
+  readonly $: 'HistoryStorage' = 'HistoryStorage';
+
   add(row: Omit<History, 'createdAt' | 'id' | 'updatedAt'>) {
     super.add({ ...row, id: (+new Date()).toString() });
   }

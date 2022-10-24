@@ -10,6 +10,8 @@ export interface KnownClient extends FileStorageRow {
 }
 
 class KnownClientStorage extends FileStorage<KnownClient> {
+  readonly $: 'KnownClientStorage' = 'KnownClientStorage';
+
   constructor() {
     super();
 
