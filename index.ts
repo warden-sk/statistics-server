@@ -110,3 +110,22 @@ wss.on('connection', (ws, request) => {
 });
 
 server.listen(8080);
+
+/**/
+
+function on(codeOrName: number | string, code?: number) {
+  if (typeof codeOrName === 'number') {
+    process.exit(codeOrName);
+  }
+
+  if (typeof codeOrName === 'string' && typeof code === 'number') {
+    report(undefined, `[${codeOrName}]`, code);
+
+    process.exit(code);
+  }
+}
+
+process.on('SIGINT', on);
+process.on('SIGTERM', on);
+process.on('exit', on);
+process.on('uncaughtException', on);
