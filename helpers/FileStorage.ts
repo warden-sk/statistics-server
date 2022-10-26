@@ -3,8 +3,8 @@
  */
 
 import * as fs from 'fs';
-import { json_decode, json_encode } from './json';
 import crypto from 'crypto';
+import { json_decode, json_encode } from './json';
 
 export interface FileStorageRow {
   createdAt: number;

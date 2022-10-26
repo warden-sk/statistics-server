@@ -4,6 +4,7 @@
 
 import ClientStorage from './helpers/ClientStorage';
 import CookieStorage from './helpers/CookieStorage';
+import FileStorage from './helpers/FileStorage';
 import HistoryStorage from './helpers/HistoryStorage';
 import KnownClientStorage from './helpers/KnownClientStorage';
 import commandsFromClient from './commandsFromClient';
@@ -13,7 +14,6 @@ import sendCommand from './helpers/sendCommand';
 import { WebSocketServer } from 'ws';
 import { isLeft, isRight } from '@warden-sk/validation/functions';
 import { json_decode } from './helpers/json';
-import FileStorage from './helpers/FileStorage';
 
 const server = http.createServer();
 const wss = new WebSocketServer({ server });
