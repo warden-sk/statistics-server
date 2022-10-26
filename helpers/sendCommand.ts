@@ -6,13 +6,18 @@ import commandsFromServer from '../commandsFromServer';
 import type { EnhancedClientRow } from './ClientStorage';
 import type { TypeOf } from '@warden-sk/validation/types';
 import { isRight } from '@warden-sk/validation/functions';
+import { json_encode } from '@warden-sk/validation/json';
 
 function sendCommand(commands: TypeOf<typeof commandsFromServer>[], client: EnhancedClientRow) {
   commands.forEach(command => {
-    const validation = commandsFromServer.decode(command);
+    const _1 = commandsFromServer.decode(command);
 
-    if (isRight(validation)) {
-      client.ws?.send(JSON.stringify(validation.right));
+    if (isRight(_1)) {
+      const _2 = json_encode(_1.right);
+
+      if (isRight(_2)) {
+        client.ws?.send(_2.right);
+      }
     }
   });
 }
