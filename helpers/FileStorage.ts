@@ -4,23 +4,25 @@
 
 import * as fs from 'fs';
 import crypto from 'crypto';
-import { json_decode, json_encode } from './json';
+import type Type from '@warden-sk/validation/Type';
 import { isRight } from '@warden-sk/validation/functions';
+import { json_decode, json_encode } from './json';
+import type { TypeOf } from '@warden-sk/validation/types';
+import * as t from '@warden-sk/validation';
+import type { STORAGE_ROW } from '../commandsFromServer';
 
-export interface FileStorageRow {
-  createdAt: number;
-  id: string;
-  updatedAt: number;
-}
-
-class FileStorage<Row extends FileStorageRow> {
-  readonly $!: string;
+class FileStorage<Row extends TypeOf<typeof STORAGE_ROW>> {
+  constructor(readonly fileName: string, readonly type: Type<Row>) {}
 
   #readFile(): Row[] {
-    const decoded = json_decode(fs.readFileSync(`./json/${this.$}.json`).toString());
+    const decoded = json_decode(fs.readFileSync(`./json/${this.fileName}.json`).toString());
 
     if (isRight(decoded)) {
-      return decoded.right as unknown as Row[];
+      const validation = new t.ArrayType(this.type).decode(decoded.right);
+
+      if (isRight(validation)) {
+        return validation.right;
+      }
     }
 
     throw new Error('The file is not valid.');
@@ -32,7 +34,7 @@ class FileStorage<Row extends FileStorageRow> {
     const encoded = json_encode(rows);
 
     if (isRight(encoded)) {
-      fs.writeFileSync(`./json/${this.$}.json`, encoded.right);
+      fs.writeFileSync(`./json/${this.fileName}.json`, encoded.right);
     }
   }
 

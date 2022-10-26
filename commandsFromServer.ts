@@ -3,6 +3,7 @@
  */
 
 import * as t from '@warden-sk/validation';
+import { UnionType } from '@warden-sk/validation';
 
 export const STORAGE_ROW = new t.InterfaceType({
   createdAt: new t.NumberType(),
@@ -19,7 +20,7 @@ export const CLIENT_STORAGE_ROW = new t.IntersectionType([
   }),
 ]);
 
-export const CLIENT_STORAGE = new t.TupleType([
+export const CLIENT_STORAGE_COMMAND = new t.TupleType([
   new t.LiteralType('CLIENT_STORAGE'),
   new t.ArrayType(CLIENT_STORAGE_ROW),
 ]);
@@ -30,18 +31,28 @@ export const HISTORY_STORAGE_ROW = new t.IntersectionType([
   STORAGE_ROW,
   new t.InterfaceType({
     clientId: new t.StringType(),
+    message: new UnionType([new t.StringType(), new t.UndefinedType()]),
     url: new t.StringType(),
   }),
 ]);
 
-export const HISTORY_STORAGE = new t.TupleType([
+export const HISTORY_STORAGE_COMMAND = new t.TupleType([
   new t.LiteralType('HISTORY_STORAGE'),
   new t.ArrayType(HISTORY_STORAGE_ROW),
 ]);
 
 //----------------------------------------------------------------------------------------------------------------------
 
-export const MESSAGE_TO_CLIENT = new t.TupleType([
+export const KNOWN_CLIENT_ROW = new t.IntersectionType([
+  STORAGE_ROW,
+  new t.InterfaceType({
+    name: new t.StringType(),
+  }),
+]);
+
+//----------------------------------------------------------------------------------------------------------------------
+
+export const MESSAGE_TO_CLIENT_COMMAND = new t.TupleType([
   new t.LiteralType('MESSAGE'),
   new t.InterfaceType({
     createdAt: new t.NumberType(),
@@ -49,6 +60,10 @@ export const MESSAGE_TO_CLIENT = new t.TupleType([
   }),
 ]);
 
-const commandsFromServer = new t.UnionType([CLIENT_STORAGE, HISTORY_STORAGE, MESSAGE_TO_CLIENT]);
+const commandsFromServer = new t.UnionType([
+  CLIENT_STORAGE_COMMAND,
+  HISTORY_STORAGE_COMMAND,
+  MESSAGE_TO_CLIENT_COMMAND,
+]);
 
 export default commandsFromServer;

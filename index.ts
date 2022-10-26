@@ -75,6 +75,8 @@ wss.on('connection', (ws, request) => {
 
     ws.on('close', () => {
       client.ws.close();
+
+      // delete "ws" from "ClientStorage.#wss"
     });
 
     ws.on('message', data => {
@@ -99,7 +101,7 @@ wss.on('connection', (ws, request) => {
 
         if (commandName === 'UPDATE') {
           clientStorage.update({ id: client.id, url: json.url });
-          historyStorage.add({ clientId: client.id, url: json.url });
+          historyStorage.add({ clientId: client.id, message: undefined, url: json.url });
         }
 
         update();

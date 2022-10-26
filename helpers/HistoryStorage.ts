@@ -2,19 +2,16 @@
  * Copyright 2022 Marek Kobida
  */
 
-import type { FileStorageRow } from './FileStorage';
 import FileStorage from './FileStorage';
+import { HISTORY_STORAGE_ROW } from '../commandsFromServer';
+import type { TypeOf } from '@warden-sk/validation/types';
 
-export interface History extends FileStorageRow {
-  clientId: string;
-  message?: string | undefined;
-  url: string;
-}
+class HistoryStorage extends FileStorage<TypeOf<typeof HISTORY_STORAGE_ROW>> {
+  constructor() {
+    super('HistoryStorage', HISTORY_STORAGE_ROW);
+  }
 
-class HistoryStorage extends FileStorage<History> {
-  readonly $: 'HistoryStorage' = 'HistoryStorage';
-
-  add(row: Omit<History, 'createdAt' | 'id' | 'updatedAt'>) {
+  add(row: Omit<TypeOf<typeof HISTORY_STORAGE_ROW>, 'createdAt' | 'id' | 'updatedAt'>) {
     super.add({ ...row, id: FileStorage.id() });
   }
 }

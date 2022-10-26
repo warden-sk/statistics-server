@@ -2,15 +2,14 @@
  * Copyright 2022 Marek Kobida
  */
 
-import type { FileStorageRow } from './FileStorage';
 import FileStorage from './FileStorage';
+import { KNOWN_CLIENT_ROW } from '../commandsFromServer';
+import type { TypeOf } from '@warden-sk/validation/types';
 
-export interface KnownClient extends FileStorageRow {
-  name: string;
-}
-
-class KnownClientStorage extends FileStorage<KnownClient> {
-  readonly $: 'KnownClientStorage' = 'KnownClientStorage';
+class KnownClientStorage extends FileStorage<TypeOf<typeof KNOWN_CLIENT_ROW>> {
+  constructor() {
+    super('KnownClientStorage', KNOWN_CLIENT_ROW);
+  }
 }
 
 export default KnownClientStorage;
