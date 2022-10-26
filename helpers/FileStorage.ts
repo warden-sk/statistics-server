@@ -4,6 +4,7 @@
 
 import * as fs from 'fs';
 import { json_decode, json_encode } from './json';
+import crypto from 'crypto';
 
 export interface FileStorageRow {
   createdAt: number;
@@ -34,6 +35,10 @@ class FileStorage<Row extends FileStorageRow> {
 
   has(id: string): boolean {
     return this.#readFile().findIndex(row => row.id === id) !== -1;
+  }
+
+  static id(): string {
+    return crypto.randomUUID();
   }
 
   row(id: string): Row | undefined {

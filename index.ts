@@ -13,6 +13,7 @@ import sendCommand from './helpers/sendCommand';
 import { WebSocketServer } from 'ws';
 import { isRight } from '@warden-sk/validation/functions';
 import { json_decode } from './helpers/json';
+import FileStorage from './helpers/FileStorage';
 
 const server = http.createServer();
 const wss = new WebSocketServer({ server });
@@ -57,7 +58,7 @@ wss.on('headers', (headers, request) => {
   }
 
   // cookie does not exist
-  const clientId = (+new Date()).toString();
+  const clientId = FileStorage.id();
 
   cookieStorage.writeCookie('id', clientId, { HttpOnly: true });
 
