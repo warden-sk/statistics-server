@@ -9,7 +9,12 @@ import { isRight } from '@warden-sk/validation/functions';
 import { json_decode, json_encode } from '@warden-sk/validation/json';
 import type { TypeOf } from '@warden-sk/validation/types';
 import * as t from '@warden-sk/validation';
-import type { STORAGE_ROW } from '../commandsFromServer';
+
+export const STORAGE_ROW = new t.InterfaceType({
+  createdAt: new t.NumberType(),
+  id: new t.StringType(),
+  updatedAt: new t.NumberType(),
+});
 
 class FileStorage<Row extends TypeOf<typeof STORAGE_ROW>> {
   constructor(readonly filePath: string, readonly type: Type<Row>) {}
