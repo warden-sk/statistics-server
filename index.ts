@@ -13,7 +13,7 @@ import report, { ReportType } from './report';
 import sendCommand from './helpers/sendCommand';
 import { WebSocketServer } from 'ws';
 import { isLeft, isRight } from '@warden-sk/validation/functions';
-import { json_decode } from './helpers/json';
+import { json_decode } from '@warden-sk/validation/json';
 
 const server = http.createServer();
 const wss = new WebSocketServer({ server });
@@ -46,6 +46,8 @@ function update() {
 }
 
 wss.on('headers', (headers, request) => {
+  console.log(new Array(process.stdout.columns + 1).join('\u2014'));
+
   const cookieStorage = new CookieStorage();
 
   const cookies = cookieStorage.readCookies(request.headers['cookie'] ?? '');
@@ -74,9 +76,7 @@ wss.on('connection', (ws, request) => {
     /* (2) */ const client = clientStorage.row(request.clientId)!;
 
     ws.on('close', () => {
-      client.ws.close();
-
-      // delete "ws" from "ClientStorage.#wss"
+      client.ws.close(); // delete "ws" from "ClientStorage.#wss"
     });
 
     ws.on('message', data => {
@@ -86,6 +86,8 @@ wss.on('connection', (ws, request) => {
 
       if (isLeft(validation)) {
         report(ReportType.IN, '[Command]', `"${client.name ?? client.id}"`, 'The command is not valid.');
+
+        client.ws.close(); // delete "ws" from "ClientStorage.#wss"
       }
 
       if (isRight(validation)) {

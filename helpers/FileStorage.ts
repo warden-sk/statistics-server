@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import crypto from 'crypto';
 import type Type from '@warden-sk/validation/Type';
 import { isRight } from '@warden-sk/validation/functions';
-import { json_decode, json_encode } from './json';
+import { json_decode, json_encode } from '@warden-sk/validation/json';
 import type { TypeOf } from '@warden-sk/validation/types';
 import * as t from '@warden-sk/validation';
 import type { STORAGE_ROW } from '../commandsFromServer';
