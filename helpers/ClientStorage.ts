@@ -13,6 +13,7 @@ export interface Client extends FileStorageRow {
 
 export interface EnhancedClient extends Client {
   isKnown: boolean;
+  name?: string | undefined;
   ws: WebSocket;
 }
 
@@ -35,14 +36,22 @@ class ClientStorage extends FileStorage<Client> {
     const client = super.row(id);
 
     if (client) {
-      return { ...client, isKnown: this.knownClientStorage.has(client.id), ws: this.#wss[client.id] };
+      return {
+        ...client,
+        isKnown: this.knownClientStorage.has(client.id),
+        name: this.knownClientStorage.row(client.id)?.name,
+        ws: this.#wss[client.id],
+      };
     }
   }
 
   rows(): EnhancedClient[] {
-    return super
-      .rows()
-      .map(client => ({ ...client, isKnown: this.knownClientStorage.has(client.id), ws: this.#wss[client.id] }));
+    return super.rows().map(client => ({
+      ...client,
+      isKnown: this.knownClientStorage.has(client.id),
+      name: this.knownClientStorage.row(client.id)?.name,
+      ws: this.#wss[client.id],
+    }));
   }
 }
 

@@ -11,7 +11,7 @@ import http from 'http';
 import report, { ReportType } from './report';
 import sendCommand from './helpers/sendCommand';
 import { WebSocketServer } from 'ws';
-import { isRight } from '@warden-sk/validation/functions';
+import { isLeft, isRight } from '@warden-sk/validation/functions';
 import { json_decode } from './helpers/json';
 import FileStorage from './helpers/FileStorage';
 
@@ -70,42 +70,42 @@ wss.on('headers', (headers, request) => {
 wss.on('connection', (ws, request) => {
   clientStorage.add({ id: request.clientId, url: request.url!, ws });
 
-  ws.on('close', () => {
-    const client = clientStorage.row(request.clientId);
+  const client = clientStorage.row(request.clientId);
 
+  ws.on('close', () => {
     if (client) {
       client.ws.close();
     }
   });
 
   ws.on('message', data => {
-    console.log(new Array(process.stdout.columns + 1).join('\u2014'));
+    if (client) {
+      console.log(new Array(process.stdout.columns + 1).join('\u2014'));
 
-    const validation = commandsFromClient.decode(json_decode(data.toString()));
+      const validation = commandsFromClient.decode(json_decode(data.toString()));
 
-    if (isRight(validation)) {
-      const [commandName, json] = validation.right;
-
-      report(
-        ReportType.IN,
-        '[Command]',
-        `"${knownClientStorage.row(request.clientId)?.name ?? request.clientId}"`,
-        `"${commandName}"`,
-        json
-      );
-
-      if (commandName === 'MESSAGE') {
-        clientStorage
-          .rows()
-          .forEach(client => sendCommand([['MESSAGE', { createdAt: +new Date(), message: json.message }]], client));
+      if (isLeft(validation)) {
+        report(ReportType.IN, '[Command]', `"${client.name ?? client.id}"`, 'The command is not valid.');
       }
 
-      if (commandName === 'UPDATE') {
-        clientStorage.update({ id: request.clientId, url: json.url });
-        historyStorage.add({ clientId: request.clientId, url: json.url });
-      }
+      if (isRight(validation)) {
+        const [commandName, json] = validation.right;
 
-      update();
+        report(ReportType.IN, '[Command]', `"${client.name ?? client.id}"`, `"${commandName}"`, json);
+
+        if (commandName === 'MESSAGE') {
+          clientStorage
+            .rows()
+            .forEach(client => sendCommand([['MESSAGE', { createdAt: +new Date(), message: json.message }]], client));
+        }
+
+        if (commandName === 'UPDATE') {
+          clientStorage.update({ id: client.id, url: json.url });
+          historyStorage.add({ clientId: client.id, url: json.url });
+        }
+
+        update();
+      }
     }
   });
 });
@@ -114,7 +114,7 @@ server.listen(8080);
 
 /**/
 
-function on(codeOrName: number | string, code?: number) {
+function on(codeOrName: number | string, code?: number | undefined) {
   if (typeof codeOrName === 'number') {
     process.exit(codeOrName);
   }
