@@ -8,7 +8,7 @@ import type { TypeOf } from '@warden-sk/validation/types';
 
 class KnownClientStorage extends FileStorage<TypeOf<typeof KNOWN_CLIENT_ROW>> {
   constructor() {
-    super('KnownClientStorage', KNOWN_CLIENT_ROW);
+    super('./json/KnownClientStorage.json', KNOWN_CLIENT_ROW);
   }
 }
 

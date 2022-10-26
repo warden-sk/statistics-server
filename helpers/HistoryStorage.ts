@@ -8,7 +8,7 @@ import type { TypeOf } from '@warden-sk/validation/types';
 
 class HistoryStorage extends FileStorage<TypeOf<typeof HISTORY_STORAGE_ROW>> {
   constructor() {
-    super('HistoryStorage', HISTORY_STORAGE_ROW);
+    super('./json/HistoryStorage.json', HISTORY_STORAGE_ROW);
   }
 
   add(row: Omit<TypeOf<typeof HISTORY_STORAGE_ROW>, 'createdAt' | 'id' | 'updatedAt'>) {

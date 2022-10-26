@@ -12,10 +12,10 @@ import * as t from '@warden-sk/validation';
 import type { STORAGE_ROW } from '../commandsFromServer';
 
 class FileStorage<Row extends TypeOf<typeof STORAGE_ROW>> {
-  constructor(readonly fileName: string, readonly type: Type<Row>) {}
+  constructor(readonly filePath: string, readonly type: Type<Row>) {}
 
   #readFile(): Row[] {
-    const decoded = json_decode(fs.readFileSync(`./json/${this.fileName}.json`).toString());
+    const decoded = json_decode(fs.readFileSync(this.filePath).toString());
 
     if (isRight(decoded)) {
       const validation = new t.ArrayType(this.type).decode(decoded.right);
@@ -34,7 +34,7 @@ class FileStorage<Row extends TypeOf<typeof STORAGE_ROW>> {
     const encoded = json_encode(rows);
 
     if (isRight(encoded)) {
-      fs.writeFileSync(`./json/${this.fileName}.json`, encoded.right);
+      fs.writeFileSync(this.filePath, encoded.right);
     }
   }
 

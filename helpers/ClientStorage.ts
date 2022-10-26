@@ -18,7 +18,7 @@ class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
   #wss: { [clientId: string]: WebSocket } = {};
 
   constructor(readonly knownClientStorage: KnownClientStorage) {
-    super('ClientStorage', CLIENT_STORAGE_ROW);
+    super('./json/ClientStorage', CLIENT_STORAGE_ROW);
   }
 
   add({ ws, ...client }: Omit<EnhancedClientRow, 'createdAt' | 'isKnown' | 'name' | 'updatedAt'>) {
