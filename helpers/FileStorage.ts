@@ -17,7 +17,7 @@ class FileStorage<Row extends FileStorageRow> {
   readonly $!: string;
 
   #readFile(): Row[] {
-    const decoded = json_decode(fs.readFileSync(`./json/${this.$}.json`));
+    const decoded = json_decode(fs.readFileSync(`./json/${this.$}.json`).toString());
 
     if (isRight(decoded)) {
       return decoded.right as unknown as Row[];
