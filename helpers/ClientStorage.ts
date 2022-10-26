@@ -18,11 +18,11 @@ export const CLIENT_STORAGE_ROW = new t.IntersectionType([
 export interface EnhancedClientRow extends TypeOf<typeof CLIENT_STORAGE_ROW> {
   isKnown: boolean;
   name?: string | undefined;
-  ws: WebSocket;
+  ws?: WebSocket | undefined;
 }
 
 class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
-  wss: { [clientId: string]: WebSocket } = {};
+  wss: { [clientId: string]: WebSocket | undefined } = {};
 
   constructor(readonly knownClientStorage: KnownClientStorage) {
     super('./json/ClientStorage.json', CLIENT_STORAGE_ROW);
@@ -42,7 +42,7 @@ class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
         ...client,
         isKnown: this.knownClientStorage.has(client.id),
         name: this.knownClientStorage.row(client.id)?.name,
-        ws: this.wss[client.id]!,
+        ws: this.wss[client.id],
       };
     }
   }
@@ -52,7 +52,7 @@ class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
       ...client,
       isKnown: this.knownClientStorage.has(client.id),
       name: this.knownClientStorage.row(client.id)?.name,
-      ws: this.wss[client.id]!,
+      ws: this.wss[client.id],
     }));
   }
 }

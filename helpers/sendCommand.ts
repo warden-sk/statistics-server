@@ -12,7 +12,7 @@ function sendCommand(commands: TypeOf<typeof commandsFromServer>[], client: Enha
     const validation = commandsFromServer.decode(command);
 
     if (isRight(validation)) {
-      client.ws.send(JSON.stringify(validation.right));
+      client.ws?.send(JSON.stringify(validation.right));
     }
   });
 }

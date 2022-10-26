@@ -2,7 +2,7 @@
  * Copyright 2022 Marek Kobida
  */
 
-import * as fs from 'fs';
+import fs from 'fs';
 import crypto from 'crypto';
 import type Type from '@warden-sk/validation/Type';
 import { isRight } from '@warden-sk/validation/functions';
@@ -40,7 +40,7 @@ class FileStorage<Row extends TypeOf<typeof STORAGE_ROW>> {
     const encoded = json_encode(rows);
 
     if (isRight(encoded)) {
-      zlib.gzip(encoded.right, (error, json) => fs.writeFileSync(this.filePath, json));
+      fs.writeFileSync(this.filePath, zlib.gzipSync(encoded.right));
     }
   }
 
