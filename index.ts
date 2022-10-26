@@ -103,9 +103,9 @@ wss.on('connection', (ws, request) => {
         clientStorage.update({ id: request.clientId, url: json.url });
         historyStorage.add({ clientId: request.clientId, url: json.url });
       }
-    }
 
-    update();
+      update();
+    }
   });
 });
 
