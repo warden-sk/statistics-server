@@ -9,6 +9,7 @@ import { isRight } from '@warden-sk/validation/functions';
 import { json_decode, json_encode } from '@warden-sk/validation/json';
 import type { TypeOf } from '@warden-sk/validation/types';
 import * as t from '@warden-sk/validation';
+import zlib from 'zlib';
 
 export const STORAGE_ROW = new t.InterfaceType({
   createdAt: new t.NumberType(),
@@ -20,7 +21,7 @@ class FileStorage<Row extends TypeOf<typeof STORAGE_ROW>> {
   constructor(readonly filePath: string, readonly type: Type<Row>) {}
 
   #readFile(): Row[] {
-    const decoded = json_decode(fs.readFileSync(this.filePath).toString());
+    const decoded = json_decode(zlib.gunzipSync(fs.readFileSync(this.filePath)).toString());
 
     if (isRight(decoded)) {
       const validation = new t.ArrayType(this.type).decode(decoded.right);
@@ -39,7 +40,7 @@ class FileStorage<Row extends TypeOf<typeof STORAGE_ROW>> {
     const encoded = json_encode(rows);
 
     if (isRight(encoded)) {
-      fs.writeFileSync(this.filePath, encoded.right);
+      zlib.gzip(encoded.right, (error, json) => fs.writeFileSync(this.filePath, json));
     }
   }
 
