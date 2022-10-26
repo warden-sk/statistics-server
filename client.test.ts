@@ -16,10 +16,12 @@ ws.on('upgrade', request => {
 
     const pattern = /id=([^;]+)/;
 
-    if (pattern.test(FIRST_COOKIE)) {
+    if (FIRST_COOKIE && pattern.test(FIRST_COOKIE)) {
       const [, id] = pattern.exec(FIRST_COOKIE) ?? [];
 
-      headers.id = id;
+      if (id) {
+        headers.cookie = `id=${id}`;
+      }
     }
   }
 });

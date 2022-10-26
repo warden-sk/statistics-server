@@ -41,6 +41,10 @@ class FileStorage<Row extends FileStorageRow> {
     return crypto.randomUUID();
   }
 
+  static isId(id?: string | undefined): id is string {
+    return typeof id === 'string' && /[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}/.test(id);
+  }
+
   row(id: string): Row | undefined {
     const rows = this.#readFile();
 
@@ -55,7 +59,7 @@ class FileStorage<Row extends FileStorageRow> {
     return this.#readFile();
   }
 
-  update(json: { [K in keyof Row]?: Row[K] }) {
+  update(json: { [K in keyof Row]?: Row[K] | undefined }) {
     this.#writeFile(rows =>
       rows.map(row => {
         if (row.id === json.id) {

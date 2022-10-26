@@ -40,7 +40,7 @@ class ClientStorage extends FileStorage<Client> {
         ...client,
         isKnown: this.knownClientStorage.has(client.id),
         name: this.knownClientStorage.row(client.id)?.name,
-        ws: this.#wss[client.id],
+        ws: this.#wss[client.id]!,
       };
     }
   }
@@ -50,7 +50,7 @@ class ClientStorage extends FileStorage<Client> {
       ...client,
       isKnown: this.knownClientStorage.has(client.id),
       name: this.knownClientStorage.row(client.id)?.name,
-      ws: this.#wss[client.id],
+      ws: this.#wss[client.id]!,
     }));
   }
 }

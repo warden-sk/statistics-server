@@ -51,7 +51,7 @@ wss.on('headers', (headers, request) => {
   const cookies = cookieStorage.readCookies(request.headers['cookie'] ?? '');
 
   // cookie exists
-  if (cookies.id !== undefined) {
+  if (FileStorage.isId(cookies.id)) {
     request.clientId = cookies.id;
 
     return;
@@ -62,7 +62,7 @@ wss.on('headers', (headers, request) => {
 
   cookieStorage.writeCookie('id', clientId, { HttpOnly: true });
 
-  headers.push(`Set-Cookie: ${cookieStorage.cookies().join(',')}`);
+  headers.push(`set-cookie: ${cookieStorage.cookies().join(',')}`);
 
   request.clientId = clientId;
 });
