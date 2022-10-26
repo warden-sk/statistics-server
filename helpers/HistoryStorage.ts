@@ -7,6 +7,7 @@ import FileStorage from './FileStorage';
 
 export interface History extends FileStorageRow {
   clientId: string;
+  message?: string | undefined;
   url: string;
 }
 

@@ -5,6 +5,7 @@
 import * as fs from 'fs';
 import crypto from 'crypto';
 import { json_decode, json_encode } from './json';
+import { isRight } from '@warden-sk/validation/functions';
 
 export interface FileStorageRow {
   createdAt: number;
@@ -16,13 +17,23 @@ class FileStorage<Row extends FileStorageRow> {
   readonly $!: string;
 
   #readFile(): Row[] {
-    return json_decode(fs.readFileSync(`./json/${this.$}.json`));
+    const decoded = json_decode(fs.readFileSync(`./json/${this.$}.json`));
+
+    if (isRight(decoded)) {
+      return decoded.right as unknown as Row[];
+    }
+
+    throw new Error('The file is not valid.');
   }
 
   #writeFile(on: (rows: Row[]) => Row[]) {
     const rows = on(this.#readFile());
 
-    fs.writeFileSync(`./json/${this.$}.json`, json_encode(rows));
+    const encoded = json_encode(rows);
+
+    if (isRight(encoded)) {
+      fs.writeFileSync(`./json/${this.$}.json`, encoded.right);
+    }
   }
 
   //--------------------------------------------------------------------------------------------------------------------

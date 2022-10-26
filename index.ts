@@ -20,7 +20,7 @@ const wss = new WebSocketServer({ server });
 
 declare module 'http' {
   interface IncomingMessage {
-    clientId: string;
+    clientId?: string | undefined;
   }
 }
 
@@ -68,18 +68,16 @@ wss.on('headers', (headers, request) => {
 });
 
 wss.on('connection', (ws, request) => {
-  clientStorage.add({ id: request.clientId, url: request.url!, ws });
+  if (request.clientId) {
+    /* (1) */ clientStorage.add({ id: request.clientId, url: request.url!, ws });
 
-  const client = clientStorage.row(request.clientId);
+    /* (2) */ const client = clientStorage.row(request.clientId)!;
 
-  ws.on('close', () => {
-    if (client) {
+    ws.on('close', () => {
       client.ws.close();
-    }
-  });
+    });
 
-  ws.on('message', data => {
-    if (client) {
+    ws.on('message', data => {
       console.log(new Array(process.stdout.columns + 1).join('\u2014'));
 
       const validation = commandsFromClient.decode(json_decode(data.toString()));
@@ -106,27 +104,18 @@ wss.on('connection', (ws, request) => {
 
         update();
       }
-    }
-  });
+    });
+  }
 });
 
-server.listen(8080);
+server.listen(1337);
 
 /**/
 
-function on(codeOrName: number | string, code?: number | undefined) {
-  if (typeof codeOrName === 'number') {
-    process.exit(codeOrName);
-  }
+(['SIGINT', 'SIGTERM'] as const).forEach(signal =>
+  process.on(signal, () => {
+    historyStorage.add({ clientId: '00000000-0000-0000-0000-000000000000', message: signal, url: '/' });
 
-  if (typeof codeOrName === 'string' && typeof code === 'number') {
-    report(undefined, `[${codeOrName}]`, code);
-
-    process.exit(code);
-  }
-}
-
-process.on('SIGINT', on);
-process.on('SIGTERM', on);
-process.on('exit', on);
-process.on('uncaughtException', on);
+    process.exit();
+  })
+);

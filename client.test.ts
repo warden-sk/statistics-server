@@ -6,7 +6,7 @@ import WebSocket from 'ws';
 
 const headers: { [name: string]: string } = {};
 
-const ws = new WebSocket('ws://127.0.0.1:8080', { headers });
+const ws = new WebSocket('ws://127.0.0.1:1337', { headers });
 
 ws.on('upgrade', request => {
   const SET_COOKIE_HEADER = request.headers['set-cookie'];
