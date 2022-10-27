@@ -4,17 +4,13 @@
 
 import type { Either } from '@warden-sk/validation/Either';
 import { chainW, right } from '@warden-sk/validation/Either';
-import type { JSON_TYPE } from '@warden-sk/validation/json';
 import { json_encode } from '@warden-sk/validation/json';
 import pipe from '@warden-sk/validation/pipe';
 import type WebSocket from 'ws';
 import type { TypeOf } from '@warden-sk/validation/types';
 import type Type from '@warden-sk/validation/Type';
 
-function sendCommand(
-  of: Type<JSON_TYPE>,
-  ws: WebSocket
-): <T extends TypeOf<typeof of>>(command: T) => Either<unknown, true> {
+function sendCommand(of: Type<any>, ws: WebSocket): <T extends TypeOf<typeof of>>(command: T) => Either<unknown, true> {
   return command =>
     pipe(
       /* (1) */ command,
