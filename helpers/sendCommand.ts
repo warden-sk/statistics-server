@@ -2,15 +2,20 @@
  * Copyright 2022 Marek Kobida
  */
 
+import commandsFromClient from '../commandsFromClient';
+import commandsFromServer from '../commandsFromServer';
+import pipe from '@warden-sk/validation/pipe';
+import type Type from '@warden-sk/validation/Type';
+import type WebSocket from 'ws';
 import type { Either } from '@warden-sk/validation/Either';
 import { chainW, right } from '@warden-sk/validation/Either';
-import { json_encode } from '@warden-sk/validation/json';
-import pipe from '@warden-sk/validation/pipe';
-import type WebSocket from 'ws';
 import type { TypeOf } from '@warden-sk/validation/types';
-import type Type from '@warden-sk/validation/Type';
+import { json_encode } from '@warden-sk/validation/json';
 
-function sendCommand(of: Type<any>, ws: WebSocket): <T extends TypeOf<typeof of>>(command: T) => Either<unknown, true> {
+function sendCommand<Of extends Type<any>>(
+  of: Of,
+  ws: WebSocket
+): <Command extends TypeOf<Of>>(command: Command) => Either<unknown, true> {
   return command =>
     pipe(
       /* (1) */ command,
@@ -22,6 +27,18 @@ function sendCommand(of: Type<any>, ws: WebSocket): <T extends TypeOf<typeof of>
         return right(true);
       })
     );
+}
+
+export function sendCommandToClient(
+  ws: WebSocket
+): <Command extends TypeOf<typeof commandsFromClient>>(command: Command) => Either<unknown, true> {
+  return command => sendCommand(commandsFromClient, ws)(command);
+}
+
+export function sendCommandToServer(
+  ws: WebSocket
+): <Command extends TypeOf<typeof commandsFromServer>>(command: Command) => Either<unknown, true> {
+  return command => sendCommand(commandsFromServer, ws)(command);
 }
 
 export default sendCommand;

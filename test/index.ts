@@ -4,24 +4,23 @@
 
 import WebSocket from 'ws';
 import * as h from '../helpers';
-import commandsFromClient from '../commandsFromClient';
 
 function $() {
   const headers: { [name: string]: string | undefined } = {};
 
   const ws = new WebSocket('ws://127.0.0.1:1337', { headers });
 
-  //----------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
-  ws.on('error', () => {});
+  ws.on('error', $);
 
   ws.on('open', () => {
-    const sendCommand = h.sendCommand(commandsFromClient, ws);
+    const sendCommand = h.sendCommandToClient(ws);
 
     sendCommand(['UPDATE', { url: '/test' }]);
   });
 
-  //----------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
 
   ws.on('upgrade', request => {
     const SET_COOKIE_HEADER = request.headers['set-cookie'];

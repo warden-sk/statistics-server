@@ -11,13 +11,13 @@ import type { TypeOf } from '@warden-sk/validation/types';
 import * as t from '@warden-sk/validation';
 import zlib from 'zlib';
 
-export const STORAGE_ROW = new t.InterfaceType({
+export const FILE_STORAGE_ROW = new t.InterfaceType({
   createdAt: new t.NumberType(),
   id: new t.StringType(),
   updatedAt: new t.NumberType(),
 });
 
-class FileStorage<Row extends TypeOf<typeof STORAGE_ROW>> {
+class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
   constructor(readonly filePath: string, readonly type: Type<Row>) {}
 
   #readFile(): Row[] {

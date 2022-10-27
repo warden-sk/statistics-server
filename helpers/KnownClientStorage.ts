@@ -2,12 +2,12 @@
  * Copyright 2022 Marek Kobida
  */
 
-import FileStorage, { STORAGE_ROW } from './FileStorage';
+import FileStorage, { FILE_STORAGE_ROW } from './FileStorage';
 import type { TypeOf } from '@warden-sk/validation/types';
 import * as t from '@warden-sk/validation';
 
 export const KNOWN_CLIENT_STORAGE_ROW = new t.IntersectionType([
-  STORAGE_ROW,
+  FILE_STORAGE_ROW,
   new t.InterfaceType({
     name: new t.StringType(),
   }),

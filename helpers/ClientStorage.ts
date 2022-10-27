@@ -2,20 +2,20 @@
  * Copyright 2022 Marek Kobida
  */
 
-import FileStorage, { STORAGE_ROW } from './FileStorage';
+import FileStorage, { FILE_STORAGE_ROW } from './FileStorage';
 import type KnownClientStorage from './KnownClientStorage';
 import type { WebSocket } from 'ws';
 import type { TypeOf } from '@warden-sk/validation/types';
 import * as t from '@warden-sk/validation';
 
 export const CLIENT_STORAGE_ROW = new t.IntersectionType([
-  STORAGE_ROW,
+  FILE_STORAGE_ROW,
   new t.InterfaceType({
     url: new t.StringType(),
   }),
 ]);
 
-export interface EnhancedClientRow extends TypeOf<typeof CLIENT_STORAGE_ROW> {
+interface EnhancedClient extends TypeOf<typeof CLIENT_STORAGE_ROW> {
   isKnown: boolean;
   name?: string | undefined;
   ws?: WebSocket | undefined;
@@ -28,13 +28,13 @@ class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
     super('./json/ClientStorage.json', CLIENT_STORAGE_ROW);
   }
 
-  add({ ws, ...client }: Omit<EnhancedClientRow, 'createdAt' | 'isKnown' | 'name' | 'updatedAt'>) {
+  add({ ws, ...client }: Omit<EnhancedClient, 'createdAt' | 'isKnown' | 'name' | 'updatedAt'>) {
     super.add(client);
 
     this.wss[client.id] = ws;
   }
 
-  row(id: string): EnhancedClientRow | undefined {
+  row(id: string): EnhancedClient | undefined {
     const client = super.row(id);
 
     if (client) {
@@ -47,7 +47,7 @@ class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
     }
   }
 
-  rows(): EnhancedClientRow[] {
+  rows(): EnhancedClient[] {
     return super.rows().map(client => ({
       ...client,
       isKnown: this.knownClientStorage.has(client.id),
