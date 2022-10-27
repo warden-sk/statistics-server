@@ -3,28 +3,28 @@
  */
 
 import type { Either } from '@warden-sk/validation/Either';
-import { chainW, isLeft, right } from '@warden-sk/validation/Either';
+import { chainW, right } from '@warden-sk/validation/Either';
+import type { JSON_TYPE } from '@warden-sk/validation/json';
 import { json_encode } from '@warden-sk/validation/json';
 import pipe from '@warden-sk/validation/pipe';
 import type WebSocket from 'ws';
 import type { TypeOf } from '@warden-sk/validation/types';
 import type Type from '@warden-sk/validation/Type';
 
-function sendCommand(of: Type<any>, ws: WebSocket): <T extends TypeOf<typeof of>>(command: T) => Either<unknown, T> {
+function sendCommand(
+  of: Type<JSON_TYPE>,
+  ws: WebSocket
+): <T extends TypeOf<typeof of>>(command: T) => Either<unknown, true> {
   return command =>
     pipe(
       /* (1) */ command,
       /* (2) */ of.decode,
       /* (3) */ chainW(json_encode),
-      /* (4) */ json => {
-        if (isLeft(json)) {
-          return json;
-        }
+      /* (4) */ chainW(json => {
+        ws.send(json);
 
-        ws.send(json.right);
-
-        return right(command);
-      }
+        return right(true);
+      })
     );
 }
 
