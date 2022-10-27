@@ -3,7 +3,8 @@
  */
 
 import WebSocket from 'ws';
-import sendCommand from './sendCommand';
+import * as h from '../helpers';
+import commandsFromClient from '../commandsFromClient';
 
 function $() {
   const headers: { [name: string]: string | undefined } = {};
@@ -15,7 +16,9 @@ function $() {
   ws.on('error', () => {});
 
   ws.on('open', () => {
-    sendCommand(ws)(['UPDATE', { url: '/test' }]);
+    const sendCommand = h.sendCommand(commandsFromClient, ws);
+
+    sendCommand(['UPDATE', { url: '/test' }]);
   });
 
   //----------------------------------------------------------------------------------------------------------------------

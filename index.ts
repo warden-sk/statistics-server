@@ -2,18 +2,14 @@
  * Copyright 2022 Marek Kobida
  */
 
-import ClientStorage from './helpers/ClientStorage';
-import HistoryStorage from './helpers/HistoryStorage';
-import KnownClientStorage from './helpers/KnownClientStorage';
 import commandsFromClient from './commandsFromClient';
 import http from 'http';
 import report, { ReportType } from './report';
-import sendCommand from './helpers/sendCommand';
 import { WebSocketServer } from 'ws';
-import { isLeft, isRight } from '@warden-sk/validation/functions';
+import { isLeft, isRight } from '@warden-sk/validation/Either';
 import { json_decode } from '@warden-sk/validation/json';
-import CookieStorage from './helpers/CookieStorage';
-import FileStorage from './helpers/FileStorage';
+import commandsFromServer from './commandsFromServer';
+import * as h from './helpers';
 
 const server = http.createServer();
 const wss = new WebSocketServer({ server });
@@ -24,19 +20,16 @@ declare module 'http' {
   }
 }
 
-const clientStorage = new ClientStorage(new KnownClientStorage());
-const historyStorage = new HistoryStorage();
+const clientStorage = new h.ClientStorage(new h.KnownClientStorage());
+const historyStorage = new h.HistoryStorage();
 
 function update() {
   clientStorage.rows().forEach(client => {
-    if (client.isKnown) {
-      sendCommand(
-        [
-          ['CLIENT_STORAGE', clientStorage.rows()],
-          ['HISTORY_STORAGE', historyStorage.rows()],
-        ],
-        client
-      );
+    if (client.isKnown && client.ws) {
+      const sendCommand = h.sendCommand(commandsFromServer, client.ws);
+
+      sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
+      sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
     }
   });
 }
@@ -71,7 +64,14 @@ wss.on('connection', (ws, request) => {
           if (commandName === 'MESSAGE') {
             clientStorage
               .rows()
-              .forEach(client => sendCommand([['MESSAGE', { createdAt: +new Date(), message: json.message }]], client));
+              .forEach(
+                client =>
+                  client.ws &&
+                  h.sendCommand(
+                    commandsFromServer,
+                    client.ws
+                  )(['MESSAGE', { createdAt: +new Date(), message: json.message }])
+              );
           }
 
           if (commandName === 'UPDATE') {
@@ -89,19 +89,19 @@ wss.on('connection', (ws, request) => {
 wss.on('headers', (headers, request) => {
   console.log(new Array(process.stdout.columns + 1).join('\u2014'));
 
-  const cookieStorage = new CookieStorage();
+  const cookieStorage = new h.CookieStorage();
 
   const cookies = cookieStorage.readCookies(request.headers['cookie'] ?? '');
 
   // cookie exists
-  if (FileStorage.isId(cookies.id)) {
+  if (h.FileStorage.isId(cookies.id)) {
     request.clientId = cookies.id;
 
     return;
   }
 
   // cookie does not exist
-  const clientId = FileStorage.id();
+  const clientId = h.FileStorage.id();
 
   cookieStorage.writeCookie('id', clientId, { HttpOnly: true });
 
