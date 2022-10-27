@@ -40,8 +40,7 @@ wss.on('connection', (ws, request) => {
     /* (2) */ const client = clientStorage.row(request.clientId)!;
 
     ws.on('close', () => {
-      /* (1) */ client.ws?.close();
-      /* (2) */ delete clientStorage.wss[client.id];
+      delete clientStorage.wss[client.id];
     });
 
     ws.on('message', data => {
@@ -54,6 +53,8 @@ wss.on('connection', (ws, request) => {
 
         if (isLeft(validation)) {
           report(ReportType.IN, '[Command]', `"${client.name ?? client.id}"`, 'The command is not valid.');
+
+          client.ws?.close();
         }
 
         if (isRight(validation)) {
