@@ -67,10 +67,7 @@ wss.on('connection', (ws, request) => {
               .forEach(
                 client =>
                   client.ws &&
-                  h.sendCommand(
-                    commandsFromServer,
-                    client.ws
-                  )(['MESSAGE', { createdAt: +new Date(), message: json.message }])
+                  h.sendCommandToClient(client.ws)(['MESSAGE', { createdAt: +new Date(), message: json.message }])
               );
           }
 

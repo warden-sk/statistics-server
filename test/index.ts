@@ -15,7 +15,7 @@ function $() {
   ws.on('error', $);
 
   ws.on('open', () => {
-    const sendCommand = h.sendCommandToClient(ws);
+    const sendCommand = h.sendCommandToServer(ws);
 
     sendCommand(['UPDATE', { url: '/test' }]);
   });

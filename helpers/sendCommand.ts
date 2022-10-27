@@ -31,14 +31,14 @@ function sendCommand<Of extends Type<any>>(
 
 export function sendCommandToClient(
   ws: WebSocket
-): <Command extends TypeOf<typeof commandsFromClient>>(command: Command) => Either<unknown, true> {
-  return command => sendCommand(commandsFromClient, ws)(command);
+): <Command extends TypeOf<typeof commandsFromServer>>(command: Command) => Either<unknown, true> {
+  return command => sendCommand(commandsFromServer, ws)(command);
 }
 
 export function sendCommandToServer(
   ws: WebSocket
-): <Command extends TypeOf<typeof commandsFromServer>>(command: Command) => Either<unknown, true> {
-  return command => sendCommand(commandsFromServer, ws)(command);
+): <Command extends TypeOf<typeof commandsFromClient>>(command: Command) => Either<unknown, true> {
+  return command => sendCommand(commandsFromClient, ws)(command);
 }
 
 export default sendCommand;
