@@ -5,31 +5,37 @@
 import WebSocket from 'ws';
 import sendCommand from './sendCommand';
 
-const headers: { [name: string]: string | undefined } = {};
+function $() {
+  const headers: { [name: string]: string | undefined } = {};
 
-const ws = new WebSocket('ws://127.0.0.1:1337', { headers });
+  const ws = new WebSocket('ws://127.0.0.1:1337', { headers });
 
-//----------------------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------------------------------
 
-ws.on('open', () => {
-  sendCommand(ws)(['UPDATE', { url: '/test' }]);
-});
+  ws.on('error', () => {});
 
-//----------------------------------------------------------------------------------------------------------------------
+  ws.on('open', () => {
+    sendCommand(ws)(['UPDATE', { url: '/test' }]);
+  });
 
-ws.on('upgrade', request => {
-  const SET_COOKIE_HEADER = request.headers['set-cookie'];
+  //----------------------------------------------------------------------------------------------------------------------
 
-  if (Array.isArray(SET_COOKIE_HEADER)) {
-    const FIRST_COOKIE = SET_COOKIE_HEADER[0];
-    const PATTERN = /id=([^;]+)/;
+  ws.on('upgrade', request => {
+    const SET_COOKIE_HEADER = request.headers['set-cookie'];
 
-    if (FIRST_COOKIE && PATTERN.test(FIRST_COOKIE)) {
-      const [, id] = PATTERN.exec(FIRST_COOKIE) ?? [];
+    if (Array.isArray(SET_COOKIE_HEADER)) {
+      const FIRST_COOKIE = SET_COOKIE_HEADER[0];
+      const PATTERN = /id=([^;]+)/;
 
-      if (id) {
-        headers.cookie = `id=${id}`;
+      if (FIRST_COOKIE && PATTERN.test(FIRST_COOKIE)) {
+        const [, id] = PATTERN.exec(FIRST_COOKIE) ?? [];
+
+        if (id) {
+          headers.cookie = `id=${id}`;
+        }
       }
     }
-  }
-});
+  });
+}
+
+$();
