@@ -12,9 +12,10 @@ const headers: { [name: string]: string | undefined } = {};
 const ws = new WebSocket(WEB_SOCKET_SERVER, { headers });
 
 ws.on('open', () => {
-  const sendCommand = h.sendCommandToServer(ws.send);
+  const sendCommand = h.sendCommandToServer(json => ws.send(json));
 
   sendCommand(['MESSAGE', { message: 'Marek Kobida' }]);
+  sendCommand(['SUBSCRIBE', { 'e-mail': 'marek.kobida@gmail.com' }]);
 });
 
 ws.on('upgrade', request => {

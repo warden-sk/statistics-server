@@ -21,7 +21,12 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
   constructor(readonly filePath: string, readonly type: Type<Row>) {}
 
   #readFile(): Row[] {
-    const decoded = json_decode(zlib.gunzipSync(fs.readFileSync(this.filePath)).toString());
+    const $ =
+      process.env.NODE_ENV === 'development'
+        ? fs.readFileSync(this.filePath)
+        : zlib.gunzipSync(fs.readFileSync(this.filePath));
+
+    const decoded = json_decode($.toString());
 
     if (isRight(decoded)) {
       const validation = new t.ArrayType(this.type).decode(decoded.right);
@@ -40,7 +45,9 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
     const encoded = json_encode(rows);
 
     if (isRight(encoded)) {
-      fs.writeFileSync(this.filePath, zlib.gzipSync(encoded.right));
+      const $ = process.env.NODE_ENV === 'development' ? encoded.right : zlib.gzipSync(encoded.right);
+
+      fs.writeFileSync(this.filePath, $);
     }
   }
 

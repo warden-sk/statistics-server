@@ -25,8 +25,8 @@ const subscriberStorage = new h.SubscriberStorage();
 
 function update() {
   clientStorage.rows().forEach(client => {
-    if (client.isKnown && client.ws) {
-      const sendCommand = h.sendCommand(commandsFromServer, client.ws.send);
+    if (client.isKnown) {
+      const sendCommand = h.sendCommand(commandsFromServer, json => client.ws?.send(json));
 
       sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
       sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
@@ -59,10 +59,11 @@ wss.on('connection', (ws, request) => {
           if (commandName === 'MESSAGE') {
             clientStorage
               .rows()
-              .forEach(
-                client =>
-                  client.ws &&
-                  h.sendCommandToClient(client.ws.send)(['MESSAGE', { createdAt: +new Date(), message: json.message }])
+              .forEach(client =>
+                h.sendCommandToClient(json => client.ws?.send(json))([
+                  'MESSAGE',
+                  { createdAt: +new Date(), message: json.message },
+                ])
               );
           }
 
