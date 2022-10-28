@@ -5,21 +5,17 @@
 import WebSocket from 'ws';
 import * as h from '../helpers';
 
-const WEB_SOCKET_SERVER = 'ws://127.0.0.1:1337';
+const WEB_SOCKET_SERVER = 'ws://marekkobida.sk:1337';
 
 const headers: { [name: string]: string | undefined } = {};
 
 const ws = new WebSocket(WEB_SOCKET_SERVER, { headers });
 
-//--------------------------------------------------------------------------------------------------------------------
-
 ws.on('open', () => {
-  const sendCommand = h.sendCommandToServer(ws);
+  const sendCommand = h.sendCommandToServer(ws.send);
 
   sendCommand(['MESSAGE', { message: 'Marek Kobida' }]);
 });
-
-//--------------------------------------------------------------------------------------------------------------------
 
 ws.on('upgrade', request => {
   const SET_COOKIE_HEADER = request.headers['set-cookie'];

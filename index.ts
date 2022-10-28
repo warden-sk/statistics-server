@@ -21,6 +21,7 @@ declare module 'http' {
 
 const clientStorage = new h.ClientStorage(new h.KnownClientStorage());
 const historyStorage = new h.HistoryStorage();
+const subscriberStorage = new h.SubscriberStorage();
 
 function update() {
   clientStorage.rows().forEach(client => {
@@ -65,8 +66,12 @@ wss.on('connection', (ws, request) => {
               );
           }
 
+          if (commandName === 'SUBSCRIBE') {
+            subscriberStorage.add({ id: json['e-mail'] });
+          }
+
           if (commandName === 'UPDATE') {
-            clientStorage.update({ id: client.id, url: json.url });
+            clientStorage.update(client.id, json);
             historyStorage.add({ clientId: client.id, message: undefined, url: json.url });
           }
 

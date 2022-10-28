@@ -78,10 +78,10 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
     return this.#readFile();
   }
 
-  update(json: { [K in keyof Row]?: Row[K] | undefined }) {
+  update(id: string, json: { [K in keyof Row]?: Row[K] | undefined }) {
     this.#writeFile(rows =>
       rows.map(row => {
-        if (row.id === json.id) {
+        if (row.id === id) {
           return {
             ...row,
             ...json,
