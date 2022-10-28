@@ -1,28 +1,16 @@
 # Commands
 
 ## MESSAGE
-```json
-{ message: string }
-```
-
 ```typescript
-["MESSAGE", { message: string }]
+type T = ["MESSAGE", { message: string }];
 ```
 
 ## SUBSCRIBE
-```json
-{ e-mail: string }
-```
-
 ```typescript
-["SUBSCRIBE", { e-mail: string }]
+type T = ["SUBSCRIBE", { e-mail: string }];
 ```
 
 ## UPDATE
-```json
-{ url: string }
-```
-
 ```typescript
-["UPDATE", { url: string }]
+type T = ["UPDATE", { url: string }];
 ```
