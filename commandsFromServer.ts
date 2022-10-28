@@ -20,7 +20,7 @@ export const HISTORY_STORAGE_COMMAND = new t.TupleType([
 
 //----------------------------------------------------------------------------------------------------------------------
 
-export const MESSAGE_TO_CLIENT_COMMAND = new t.TupleType([
+export const MESSAGE_COMMAND = new t.TupleType([
   new t.LiteralType('MESSAGE'),
   new t.InterfaceType({
     createdAt: new t.NumberType(),
@@ -28,10 +28,6 @@ export const MESSAGE_TO_CLIENT_COMMAND = new t.TupleType([
   }),
 ]);
 
-const commandsFromServer = new t.UnionType([
-  CLIENT_STORAGE_COMMAND,
-  HISTORY_STORAGE_COMMAND,
-  MESSAGE_TO_CLIENT_COMMAND,
-]);
+const commandsFromServer = new t.UnionType([CLIENT_STORAGE_COMMAND, HISTORY_STORAGE_COMMAND, MESSAGE_COMMAND]);
 
 export default commandsFromServer;

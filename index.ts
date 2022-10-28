@@ -25,7 +25,7 @@ const historyStorage = new h.HistoryStorage();
 function update() {
   clientStorage.rows().forEach(client => {
     if (client.isKnown && client.ws) {
-      const sendCommand = h.sendCommand(commandsFromServer, client.ws);
+      const sendCommand = h.sendCommand(commandsFromServer, client.ws.send);
 
       sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
       sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
@@ -43,8 +43,6 @@ wss.on('connection', (ws, request) => {
     });
 
     ws.on('message', data => {
-      console.log(new Array(process.stdout.columns + 1).join('\u2014'));
-
       const json = json_decode(data.toString());
 
       if (isRight(json)) {
@@ -63,7 +61,7 @@ wss.on('connection', (ws, request) => {
               .forEach(
                 client =>
                   client.ws &&
-                  h.sendCommandToClient(client.ws)(['MESSAGE', { createdAt: +new Date(), message: json.message }])
+                  h.sendCommandToClient(client.ws.send)(['MESSAGE', { createdAt: +new Date(), message: json.message }])
               );
           }
 
@@ -80,8 +78,6 @@ wss.on('connection', (ws, request) => {
 });
 
 wss.on('headers', (headers, request) => {
-  console.log(new Array(process.stdout.columns + 1).join('\u2014'));
-
   const cookieStorage = new h.CookieStorage();
 
   const cookies = cookieStorage.readCookies(request.headers['cookie'] ?? '');
