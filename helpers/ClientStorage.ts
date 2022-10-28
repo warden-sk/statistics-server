@@ -2,11 +2,11 @@
  * Copyright 2022 Marek Kobida
  */
 
+import * as t from '@warden-sk/validation';
 import FileStorage, { FILE_STORAGE_ROW } from './FileStorage';
 import type KnownClientStorage from './KnownClientStorage';
-import type { WebSocket } from 'ws';
 import type { TypeOf } from '@warden-sk/validation/types';
-import * as t from '@warden-sk/validation';
+import type { WebSocket } from 'ws';
 
 export const CLIENT_STORAGE_ROW = new t.IntersectionType([
   FILE_STORAGE_ROW,

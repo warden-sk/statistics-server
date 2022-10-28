@@ -2,9 +2,9 @@
  * Copyright 2022 Marek Kobida
  */
 
+import * as t from '@warden-sk/validation';
 import FileStorage, { FILE_STORAGE_ROW } from './FileStorage';
 import type { TypeOf } from '@warden-sk/validation/types';
-import * as t from '@warden-sk/validation';
 import { UnionType } from '@warden-sk/validation';
 
 export const HISTORY_STORAGE_ROW = new t.IntersectionType([

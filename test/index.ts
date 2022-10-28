@@ -2,8 +2,8 @@
  * Copyright 2022 Marek Kobida
  */
 
-import WebSocket from 'ws';
 import * as h from '../helpers';
+import WebSocket from 'ws';
 
 const WEB_SOCKET_SERVER = 'ws://marekkobida.sk:1337';
 

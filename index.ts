@@ -2,13 +2,13 @@
  * Copyright 2022 Marek Kobida
  */
 
-import commandsFromClient from './commandsFromClient';
-import http from 'http';
-import { WebSocketServer } from 'ws';
-import { isLeft, isRight } from '@warden-sk/validation/Either';
-import { json_decode } from '@warden-sk/validation/json';
-import commandsFromServer from './commandsFromServer';
 import * as h from './helpers';
+import { isLeft, isRight } from '@warden-sk/validation/Either';
+import { WebSocketServer } from 'ws';
+import commandsFromClient from './commandsFromClient';
+import commandsFromServer from './commandsFromServer';
+import http from 'http';
+import { json_decode } from '@warden-sk/validation/json';
 
 const server = http.createServer();
 const wss = new WebSocketServer({ server });

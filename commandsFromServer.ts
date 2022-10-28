@@ -3,8 +3,8 @@
  */
 
 import * as t from '@warden-sk/validation';
-import { HISTORY_STORAGE_ROW } from './helpers/HistoryStorage';
 import { CLIENT_STORAGE_ROW } from './helpers/ClientStorage';
+import { HISTORY_STORAGE_ROW } from './helpers/HistoryStorage';
 
 export const CLIENT_STORAGE_COMMAND = new t.TupleType([
   new t.LiteralType('CLIENT_STORAGE'),
