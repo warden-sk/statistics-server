@@ -60,7 +60,7 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
     return crypto.randomUUID();
   }
 
-  static isId(id?: string | undefined): id is string {
+  static isValidId(id?: string | undefined): id is string {
     return typeof id === 'string' && /[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}/.test(id);
   }
 

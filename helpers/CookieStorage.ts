@@ -2,8 +2,6 @@
  * Copyright 2022 Marek Kobida
  */
 
-import report, { ReportType } from '../report';
-
 export interface Cookie {
   Domain?: string;
   HttpOnly?: boolean;
@@ -53,8 +51,6 @@ class CookieStorage {
 
       if (left && right) {
         cookies[left] = right;
-
-        report(ReportType.IN, '[CookieStorage]', `"${left}"`, `"${right}"`);
       }
     }
 
@@ -62,8 +58,6 @@ class CookieStorage {
   }
 
   writeCookie(left: string, right: string, cookie: Cookie = {}) {
-    report(ReportType.OUT, '[CookieStorage]', `"${left}"`, `"${right}"`, cookie);
-
     this.#cookies = [...this.#cookies, [left, right, cookie]];
   }
 }

@@ -4,7 +4,6 @@
 
 import commandsFromClient from './commandsFromClient';
 import http from 'http';
-import report, { ReportType } from './report';
 import { WebSocketServer } from 'ws';
 import { isLeft, isRight } from '@warden-sk/validation/Either';
 import { json_decode } from '@warden-sk/validation/json';
@@ -52,15 +51,11 @@ wss.on('connection', (ws, request) => {
         const validation = commandsFromClient.decode(json.right);
 
         if (isLeft(validation)) {
-          report(ReportType.IN, '[Command]', `"${client.name ?? client.id}"`, 'The command is not valid.');
-
           client.ws?.close();
         }
 
         if (isRight(validation)) {
           const [commandName, json] = validation.right;
-
-          report(ReportType.IN, '[Command]', `"${client.name ?? client.id}"`, `"${commandName}"`, json);
 
           if (commandName === 'MESSAGE') {
             clientStorage
@@ -92,7 +87,7 @@ wss.on('headers', (headers, request) => {
   const cookies = cookieStorage.readCookies(request.headers['cookie'] ?? '');
 
   // cookie exists
-  if (h.FileStorage.isId(cookies.id)) {
+  if (h.FileStorage.isValidId(cookies.id)) {
     request.clientId = cookies.id;
 
     return;

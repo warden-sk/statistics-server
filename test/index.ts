@@ -4,11 +4,8 @@
 
 import WebSocket from 'ws';
 import * as h from '../helpers';
-import report from '../report';
 
 const WEB_SOCKET_SERVER = 'ws://127.0.0.1:1337';
-
-report(undefined, '[WebSocket]', WEB_SOCKET_SERVER);
 
 const headers: { [name: string]: string | undefined } = {};
 
@@ -17,8 +14,6 @@ const ws = new WebSocket(WEB_SOCKET_SERVER, { headers });
 //--------------------------------------------------------------------------------------------------------------------
 
 ws.on('open', () => {
-  report(undefined, '[WebSocket]', headers);
-
   const sendCommand = h.sendCommandToServer(ws);
 
   sendCommand(['MESSAGE', { message: 'Marek Kobida' }]);
