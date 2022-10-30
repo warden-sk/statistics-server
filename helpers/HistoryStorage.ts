@@ -12,7 +12,7 @@ export const HISTORY_STORAGE_ROW = new t.IntersectionType([
   new t.InterfaceType({
     clientId: new t.StringType(),
     message: new UnionType([new t.StringType(), new t.UndefinedType()]),
-    url: new t.StringType(),
+    url: new UnionType([new t.StringType(), new t.UndefinedType()]),
   }),
 ]);
 

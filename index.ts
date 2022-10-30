@@ -3,15 +3,13 @@
  */
 
 import * as h from './helpers';
-import { isLeft, isRight } from '@warden-sk/validation/Either';
 import { WebSocketServer } from 'ws';
 import commandsFromClient from './commandsFromClient';
 import commandsFromServer from './commandsFromServer';
-import http from 'http';
+import { isRight } from '@warden-sk/validation/Either';
 import { json_decode } from '@warden-sk/validation/json';
 
-const server = http.createServer();
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ port: 1337 });
 
 declare module 'http' {
   interface IncomingMessage {
@@ -48,10 +46,6 @@ wss.on('connection', (ws, request) => {
 
       if (isRight(json)) {
         const validation = commandsFromClient.decode(json.right);
-
-        if (isLeft(validation)) {
-          client.ws?.close();
-        }
 
         if (isRight(validation)) {
           const [commandName, json] = validation.right;
@@ -100,18 +94,16 @@ wss.on('headers', (headers, request) => {
 
   cookieStorage.writeCookie('id', clientId, { HttpOnly: true });
 
-  headers.push(`set-cookie: ${cookieStorage.cookies().join(',')}`);
+  headers = [...headers, `set-cookie: ${cookieStorage.cookies().join(',')}`];
 
   request.clientId = clientId;
 });
-
-server.listen(1337);
 
 /**/
 
 (['SIGINT', 'SIGTERM'] as const).forEach(signal =>
   process.on(signal, () => {
-    historyStorage.add({ clientId: '00000000-0000-0000-0000-000000000000', message: signal, url: '/' });
+    historyStorage.add({ clientId: '00000000-0000-0000-0000-000000000000', message: signal, url: undefined });
 
     process.exit();
   })

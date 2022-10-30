@@ -19,6 +19,8 @@ ws.on('open', () => {
 });
 
 ws.on('upgrade', request => {
+  console.log(request.headers);
+
   const SET_COOKIE_HEADER = request.headers['set-cookie'];
 
   if (Array.isArray(SET_COOKIE_HEADER)) {
