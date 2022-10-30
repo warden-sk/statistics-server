@@ -6,7 +6,7 @@ import * as t from '@warden-sk/validation';
 import FileStorage, { FILE_STORAGE_ROW } from './FileStorage';
 import type KnownClientStorage from './KnownClientStorage';
 import type { TypeOf } from '@warden-sk/validation/types';
-import type { WebSocket } from 'ws';
+import type http from 'http';
 
 export const CLIENT_STORAGE_ROW = new t.IntersectionType([
   FILE_STORAGE_ROW,
@@ -18,20 +18,13 @@ export const CLIENT_STORAGE_ROW = new t.IntersectionType([
 interface EnhancedClient extends TypeOf<typeof CLIENT_STORAGE_ROW> {
   isKnown: boolean;
   name?: string | undefined;
-  ws?: WebSocket | undefined;
 }
 
 class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
-  wss: { [clientId: string]: WebSocket | undefined } = {};
+  wss: { [id: string]: http.ServerResponse | undefined } = {};
 
   constructor(readonly knownClientStorage: KnownClientStorage) {
     super('./json/ClientStorage.json', CLIENT_STORAGE_ROW);
-  }
-
-  add({ ws, ...client }: Omit<EnhancedClient, 'createdAt' | 'isKnown' | 'name' | 'updatedAt'>) {
-    super.add(client);
-
-    this.wss[client.id] = ws;
   }
 
   row(id: string): EnhancedClient | undefined {
@@ -42,7 +35,6 @@ class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
         ...client,
         isKnown: this.knownClientStorage.has(client.id),
         name: this.knownClientStorage.row(client.id)?.name,
-        ws: this.wss[client.id],
       };
     }
   }
@@ -52,8 +44,11 @@ class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
       ...client,
       isKnown: this.knownClientStorage.has(client.id),
       name: this.knownClientStorage.row(client.id)?.name,
-      ws: this.wss[client.id],
     }));
+  }
+
+  sendMessage(id: string, json: string) {
+    this.wss[id]?.write(`data: ${json}\n\n`);
   }
 }
 
