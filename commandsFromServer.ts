@@ -11,14 +11,10 @@ export const CLIENT_STORAGE_COMMAND = new t.TupleType([
   new t.ArrayType(CLIENT_STORAGE_ROW),
 ]);
 
-//----------------------------------------------------------------------------------------------------------------------
-
 export const HISTORY_STORAGE_COMMAND = new t.TupleType([
   new t.LiteralType('HISTORY_STORAGE'),
   new t.ArrayType(HISTORY_STORAGE_ROW),
 ]);
-
-//----------------------------------------------------------------------------------------------------------------------
 
 export const MESSAGE_COMMAND = new t.TupleType([
   new t.LiteralType('MESSAGE'),

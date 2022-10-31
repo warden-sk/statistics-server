@@ -9,7 +9,7 @@ import type { TypeOf } from '@warden-sk/validation/types';
 import crypto from 'crypto';
 import fs from 'fs';
 import { isRight } from '@warden-sk/validation/Either';
-import zlib from 'zlib';
+import pipe from '@warden-sk/validation/pipe';
 
 export const FILE_STORAGE_ROW = new t.InterfaceType({
   createdAt: new t.NumberType(),
@@ -21,37 +21,22 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
   constructor(readonly filePath: string, readonly type: Type<Row>) {}
 
   #readFile(): Row[] {
-    const $ =
-      process.env.NODE_ENV === 'development'
-        ? fs.readFileSync(this.filePath)
-        : zlib.gunzipSync(fs.readFileSync(this.filePath));
+    const json = pipe(fs.readFileSync(this.filePath).toString(), json_decode, new t.ArrayType(this.type).decode);
 
-    const decoded = json_decode($.toString());
-
-    if (isRight(decoded)) {
-      const validation = new t.ArrayType(this.type).decode(decoded.right);
-
-      if (isRight(validation)) {
-        return validation.right;
-      }
+    if (isRight(json)) {
+      return json.right;
     }
 
     throw new Error('The file is not valid.');
   }
 
   #writeFile(on: (rows: Row[]) => Row[]) {
-    const rows = on(this.#readFile());
+    const json = pipe(on(this.#readFile()), json_encode);
 
-    const encoded = json_encode(rows);
-
-    if (isRight(encoded)) {
-      const $ = process.env.NODE_ENV === 'development' ? encoded.right : zlib.gzipSync(encoded.right);
-
-      fs.writeFileSync(this.filePath, $);
+    if (isRight(json)) {
+      fs.writeFileSync(this.filePath, json.right);
     }
   }
-
-  //--------------------------------------------------------------------------------------------------------------------
 
   add(row: Omit<Row, 'createdAt' | 'updatedAt'>) {
     if (!this.has(row.id)) {
