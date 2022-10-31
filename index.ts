@@ -3,101 +3,111 @@
  */
 
 import * as h from './helpers';
-import { WebSocketServer } from 'ws';
 import commandsFromClient from './commandsFromClient';
 import commandsFromServer from './commandsFromServer';
+import http from 'http';
 import { isRight } from '@warden-sk/validation/Either';
 import { json_decode } from '@warden-sk/validation/json';
-
-const wss = new WebSocketServer({ port: 1337 });
-
-declare module 'http' {
-  interface IncomingMessage {
-    clientId?: string | undefined;
-  }
-}
 
 const clientStorage = new h.ClientStorage(new h.KnownClientStorage());
 const historyStorage = new h.HistoryStorage();
 const subscriberStorage = new h.SubscriberStorage();
 
-function update() {
-  clientStorage.rows().forEach(client => {
-    if (client.isKnown) {
-      const sendCommand = h.sendCommand(commandsFromServer, json => client.ws?.send(json));
+const COOKIE_NAME = 'key';
 
-      sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
-      sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
-    }
-  });
-}
-
-wss.on('connection', (ws, request) => {
-  if (request.clientId) {
-    /* (1) */ clientStorage.add({ id: request.clientId, url: request.url!, ws });
-    /* (2) */ const client = clientStorage.row(request.clientId)!;
-
-    ws.on('close', () => {
-      delete clientStorage.wss[client.id];
-    });
-
-    ws.on('message', data => {
-      const json = json_decode(data.toString());
-
-      if (isRight(json)) {
-        const validation = commandsFromClient.decode(json.right);
-
-        if (isRight(validation)) {
-          const [commandName, json] = validation.right;
-
-          if (commandName === 'MESSAGE') {
-            clientStorage
-              .rows()
-              .forEach(client =>
-                h.sendCommandToClient(json => client.ws?.send(json))([
-                  'MESSAGE',
-                  { createdAt: +new Date(), message: json.message },
-                ])
-              );
-          }
-
-          if (commandName === 'SUBSCRIBE') {
-            subscriberStorage.add({ id: json['e-mail'] });
-          }
-
-          if (commandName === 'UPDATE') {
-            clientStorage.update(client.id, json);
-            historyStorage.add({ clientId: client.id, message: undefined, url: json.url });
-          }
-
-          update();
-        }
-      }
-    });
-  }
-});
-
-wss.on('headers', (headers, request) => {
+function clientIdFromRequest(request: http.IncomingMessage, response: http.ServerResponse): string {
   const cookieStorage = new h.CookieStorage();
 
-  const cookies = cookieStorage.readCookies(request.headers['cookie'] ?? '');
+  const cookies = cookieStorage.readCookies(request.headers.cookie ?? '');
 
-  // cookie exists
-  if (h.FileStorage.isValidId(cookies.id)) {
-    request.clientId = cookies.id;
+  if (h.FileStorage.isValidId(cookies[COOKIE_NAME])) {
+    // cookie exists
+
+    return cookies[COOKIE_NAME];
+  } else {
+    // cookie does not exist
+
+    const id = h.FileStorage.id();
+
+    cookieStorage.writeCookie(COOKIE_NAME, id, { HttpOnly: true });
+
+    response.setHeader('Set-Cookie', cookieStorage.cookies());
+
+    return id;
+  }
+}
+
+const server = http.createServer((request, response) => {
+  response.setHeader('Access-Control-Allow-Credentials', 'true');
+  response.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1');
+
+  const clientId = clientIdFromRequest(request, response);
+
+  /* (1) */ clientStorage.add({ id: clientId, url: request.url! });
+  /* (2) */ const client = clientStorage.row(clientId)!;
+
+  if (request.headers['accept'] === 'text/event-stream') {
+    response.setHeader('Content-Type', 'text/event-stream');
+
+    clientStorage.wss[client.id] = response;
+
+    request.on('close', () => {
+      delete clientStorage.wss[client.id];
+    });
 
     return;
   }
 
-  // cookie does not exist
-  const clientId = h.FileStorage.id();
+  let $: Buffer[] = [];
 
-  cookieStorage.writeCookie('id', clientId, { HttpOnly: true });
+  request.on('data', data => ($ = [...$, data]));
 
-  headers = [...headers, `set-cookie: ${cookieStorage.cookies().join(',')}`];
+  request.on('end', () => {
+    const json = json_decode(Buffer.concat($).toString());
 
-  request.clientId = clientId;
+    if (isRight(json)) {
+      const command = commandsFromClient.decode(json.right);
+
+      if (isRight(command)) {
+        const [commandName, json] = command.right;
+
+        if (commandName === 'MESSAGE') {
+          clientStorage.rows().forEach(client => {
+            h.sendCommandToClient(json => clientStorage.sendMessage(client.id, json))([
+              'MESSAGE',
+              { createdAt: +new Date(), message: json.message },
+            ]);
+          });
+        }
+
+        if (commandName === 'SUBSCRIBE') {
+          subscriberStorage.add({ id: json['e-mail'] });
+        }
+
+        if (commandName === 'UPDATE') {
+          clientStorage.update(client.id, json);
+
+          historyStorage.add({ clientId: client.id, message: undefined, url: json.url });
+        }
+
+        update();
+      }
+    }
+
+    response.end();
+  });
 });
+
+function update() {
+  clientStorage.rows().forEach(client => {
+    const sendCommand = h.sendCommand(commandsFromServer, json => clientStorage.sendMessage(client.id, json));
+
+    sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
+    sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
+  });
+}
+
+server.listen(1337);
 
 /**/
 
