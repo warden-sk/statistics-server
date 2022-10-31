@@ -1,3 +1,7 @@
+/*
+ * Copyright 2022 Marek Kobida
+ */
+
 import commandsFromClient from './commandsFromClient';
 
 let rows: string[] = ['# Commands'];

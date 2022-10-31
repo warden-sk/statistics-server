@@ -3,12 +3,12 @@
  */
 
 import * as t from '@warden-sk/validation';
+import { chainW, isRight } from '@warden-sk/validation/Either';
 import { json_decode, json_encode } from '@warden-sk/validation/json';
 import type Type from '@warden-sk/validation/Type';
 import type { TypeOf } from '@warden-sk/validation/types';
 import crypto from 'crypto';
 import fs from 'fs';
-import { isRight } from '@warden-sk/validation/Either';
 import pipe from '@warden-sk/validation/pipe';
 
 export const FILE_STORAGE_ROW = new t.InterfaceType({
@@ -21,7 +21,11 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
   constructor(readonly filePath: string, readonly type: Type<Row>) {}
 
   #readFile(): Row[] {
-    const json = pipe(fs.readFileSync(this.filePath).toString(), json_decode, new t.ArrayType(this.type).decode);
+    const json = pipe(
+      fs.readFileSync(this.filePath).toString(),
+      json_decode,
+      chainW(new t.ArrayType(this.type).decode)
+    );
 
     if (isRight(json)) {
       return json.right;

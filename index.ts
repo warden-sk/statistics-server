@@ -3,9 +3,9 @@
  */
 
 import * as h from './helpers';
+import { chainW, isRight } from '@warden-sk/validation/Either';
 import commandsFromClient from './commandsFromClient';
 import http from 'http';
-import { isRight } from '@warden-sk/validation/Either';
 import { json_decode } from '@warden-sk/validation/json';
 import pipe from '@warden-sk/validation/pipe';
 
@@ -63,7 +63,7 @@ const server = http.createServer((request, response) => {
   request.on('data', data => ($ += data));
 
   request.on('end', () => {
-    const command = pipe($, json_decode, commandsFromClient.decode);
+    const command = pipe($, json_decode, chainW(commandsFromClient.decode));
 
     if (isRight(command)) {
       const [commandName, json] = command.right;
