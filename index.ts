@@ -58,16 +58,12 @@ const server = http.createServer((request, response) => {
     return;
   }
 
-  let $: Buffer[] = [];
+  let $ = '';
 
-  request.on('data', data => ($ = [...$, data]));
+  request.on('data', data => ($ += data));
 
   request.on('end', () => {
-    const command = pipe(
-      /* (1) */ Buffer.concat($).toString(),
-      /* (2) */ json_decode,
-      /* (3) */ commandsFromClient.decode
-    );
+    const command = pipe($, json_decode, commandsFromClient.decode);
 
     if (isRight(command)) {
       const [commandName, json] = command.right;
