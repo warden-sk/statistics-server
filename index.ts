@@ -68,7 +68,7 @@ const server = http.createServer((request, response) => {
           return h.send_json(response)(command.left);
         }
 
-        return h.send_json(response)('Command is not valid.');
+        return h.send_json(response)(h.messages.COMMAND_NOT_VALID);
       }
 
       if (isRight(command)) {
@@ -105,7 +105,7 @@ const server = http.createServer((request, response) => {
     });
   }
 
-  return h.send_json(response)('Request is not valid.');
+  return h.send_json(response)(h.messages.REQUEST_NOT_VALID);
 });
 
 server.listen(1337);
