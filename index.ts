@@ -3,11 +3,13 @@
  */
 
 import * as h from './helpers';
-import { chainW, isRight } from '@warden-sk/validation/Either';
+import { chainW, isRight, right } from '@warden-sk/validation/Either';
+import { json_decode, json_encode } from '@warden-sk/validation/json';
+import type { Either } from '@warden-sk/validation/Either';
 import commandsFromClient from './commandsFromClient';
 import http from 'http';
-import { json_decode } from '@warden-sk/validation/json';
 import pipe from '@warden-sk/validation/pipe';
+import type stream from 'stream';
 
 const clientStorage = new h.ClientStorage(new h.KnownClientStorage());
 const historyStorage = new h.HistoryStorage();
@@ -37,9 +39,19 @@ function keyFromRequest(request: http.IncomingMessage, response: http.ServerResp
   }
 }
 
+function send_json($: stream.Writable): (json: Parameters<typeof json_encode>[0]) => Either<unknown, stream.Writable> {
+  return json =>
+    pipe(
+      json,
+      json_encode,
+      chainW(json => right($.end(json)))
+    );
+}
+
 const server = http.createServer((request, response) => {
   response.setHeader('Access-Control-Allow-Credentials', 'true');
   response.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1');
+  response.setHeader('Content-Type', 'application/json');
 
   const clientId = keyFromRequest(request, response);
 
@@ -58,45 +70,47 @@ const server = http.createServer((request, response) => {
     return;
   }
 
-  let $ = '';
+  if (request.method === 'POST') {
+    let $ = '';
 
-  request.on('data', data => ($ += data));
+    request.on('data', data => ($ += data));
 
-  request.on('end', () => {
-    const command = pipe($, json_decode, chainW(commandsFromClient.decode));
+    request.on('end', () => {
+      const command = pipe($, json_decode, chainW(commandsFromClient.decode));
 
-    if (isRight(command)) {
-      const [commandName, json] = command.right;
+      if (isRight(command)) {
+        const [commandName, json] = command.right;
 
-      if (commandName === 'MESSAGE') {
+        if (commandName === 'MESSAGE') {
+          clientStorage.rows().forEach(client => {
+            h.sendCommandToClient(json => clientStorage.sendMessage(client.id, json))([
+              'MESSAGE',
+              { createdAt: +new Date(), message: json.message },
+            ]);
+          });
+        }
+
+        if (commandName === 'SUBSCRIBE') {
+          subscriberStorage.add({ id: json['e-mail'] });
+        }
+
+        if (commandName === 'UPDATE') {
+          clientStorage.update(client.id, json);
+
+          historyStorage.add({ clientId: client.id, message: undefined, url: json.url });
+        }
+
         clientStorage.rows().forEach(client => {
-          h.sendCommandToClient(json => clientStorage.sendMessage(client.id, json))([
-            'MESSAGE',
-            { createdAt: +new Date(), message: json.message },
-          ]);
+          const sendCommand = h.sendCommandToClient(json => clientStorage.sendMessage(client.id, json));
+
+          sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
+          sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
         });
       }
+    });
+  }
 
-      if (commandName === 'SUBSCRIBE') {
-        subscriberStorage.add({ id: json['e-mail'] });
-      }
-
-      if (commandName === 'UPDATE') {
-        clientStorage.update(client.id, json);
-
-        historyStorage.add({ clientId: client.id, message: undefined, url: json.url });
-      }
-
-      clientStorage.rows().forEach(client => {
-        const sendCommand = h.sendCommandToClient(json => clientStorage.sendMessage(client.id, json));
-
-        sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
-        sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
-      });
-    }
-
-    response.end();
-  });
+  send_json(response)({ server: '1.0.0' });
 });
 
 server.listen(1337);
