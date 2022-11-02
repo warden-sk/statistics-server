@@ -3,7 +3,7 @@
  */
 
 import * as h from './helpers';
-import { chainW, isRight } from '@warden-sk/validation/Either';
+import { chainW, isLeft, isRight } from '@warden-sk/validation/Either';
 import commandsFromClient from './commandsFromClient';
 import http from 'http';
 import { json_decode } from '@warden-sk/validation/json';
@@ -63,6 +63,14 @@ const server = http.createServer((request, response) => {
     request.on('end', () => {
       const command = pipe($, json_decode, chainW(commandsFromClient.decode));
 
+      if (isLeft(command)) {
+        if (typeof command.left === 'string') {
+          return h.send_json(response)(command.left);
+        }
+
+        return h.send_json(response)('Command is not valid.');
+      }
+
       if (isRight(command)) {
         const [commandName, json] = command.right;
 
@@ -97,7 +105,7 @@ const server = http.createServer((request, response) => {
     });
   }
 
-  h.send_json(response)('The command is not valid.');
+  return h.send_json(response)('Request is not valid.');
 });
 
 server.listen(1337);
