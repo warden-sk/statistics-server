@@ -9,6 +9,7 @@ import { read_file, write_file } from '@warden-sk/validation/file';
 import type Type from '@warden-sk/validation/Type';
 import type { TypeOf } from '@warden-sk/validation/types';
 import crypto from 'crypto';
+import messages from './messages';
 import pipe from '@warden-sk/validation/pipe';
 
 export const FILE_STORAGE_ROW = new t.InterfaceType({
@@ -27,7 +28,7 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
       return json.right;
     }
 
-    throw new Error('The file is not valid.');
+    throw new Error(messages.FILE_NOT_VALID);
   }
 
   #writeFile(on: (rows: Row[]) => Row[]) {
