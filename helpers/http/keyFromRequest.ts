@@ -4,12 +4,11 @@
 
 import CookieStorage from '../CookieStorage';
 import FileStorage from '../FileStorage';
-import type http from 'http';
 
-function keyFromRequest(request: Headers, response: http.ServerResponse, cookieName = 'key'): string {
+function keyFromRequest(i: Headers, o: Headers, cookieName = 'key'): string {
   const cookieStorage = new CookieStorage();
 
-  const cookies = cookieStorage.readCookies(request.get('Cookie') ?? '');
+  const cookies = cookieStorage.readCookies(i.get('Cookie') ?? '');
 
   // cookie exists
   const cookie = cookies[cookieName];
@@ -23,7 +22,7 @@ function keyFromRequest(request: Headers, response: http.ServerResponse, cookieN
 
   cookieStorage.writeCookie(cookieName, key, { HttpOnly: true });
 
-  response.setHeader('Set-Cookie', cookieStorage.cookies());
+  cookieStorage.cookies().forEach(cookie => o.append('Set-Cookie', cookie));
 
   return key;
 }

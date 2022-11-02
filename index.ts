@@ -30,11 +30,15 @@ function headersFromRequest(request: http.IncomingMessage): Headers {
 }
 
 const server = http.createServer((request, response) => {
-  response.setHeader('Access-Control-Allow-Credentials', 'true');
-  response.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1');
-  response.setHeader('Content-Type', 'application/json');
+  const headers = new Headers({
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Origin': 'http://127.0.0.1',
+    'Content-Type': 'application/json',
+  });
 
-  const key = h.keyFromRequest(headersFromRequest(request), response);
+  const key = h.keyFromRequest(headersFromRequest(request), headers);
+
+  [...headers].forEach(([l, r]) => response.setHeader(l, r));
 
   /* (1) */ clientStorage.add({ id: key, url: request.url! });
   /* (2) */ const client = clientStorage.row(key)!;
