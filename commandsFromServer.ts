@@ -5,17 +5,17 @@
 import * as h from './helpers';
 import * as t from '@warden-sk/validation';
 
-export const CLIENT_STORAGE_COMMAND = new t.TupleType([
+const CLIENT_STORAGE_COMMAND = new t.TupleType([
   new t.LiteralType('CLIENT_STORAGE'),
   new t.ArrayType(h.CLIENT_STORAGE_ROW),
 ]);
 
-export const HISTORY_STORAGE_COMMAND = new t.TupleType([
+const HISTORY_STORAGE_COMMAND = new t.TupleType([
   new t.LiteralType('HISTORY_STORAGE'),
   new t.ArrayType(h.HISTORY_STORAGE_ROW),
 ]);
 
-export const MESSAGE_COMMAND = new t.TupleType([
+const MESSAGE_COMMAND = new t.TupleType([
   new t.LiteralType('MESSAGE'),
   new t.InterfaceType({
     createdAt: new t.NumberType(),

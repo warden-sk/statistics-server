@@ -3,7 +3,7 @@
  */
 
 export { default as ClientStorage, CLIENT_STORAGE_ROW } from './ClientStorage';
-export { default as CookieStorage, Cookie } from './CookieStorage';
+export { default as CookieStorage } from './CookieStorage';
 export { default as FileStorage, FILE_STORAGE_ROW } from './FileStorage';
 export { default as HistoryStorage, HISTORY_STORAGE_ROW } from './HistoryStorage';
 export { default as KnownClientStorage, KNOWN_CLIENT_STORAGE_ROW } from './KnownClientStorage';

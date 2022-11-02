@@ -2,7 +2,7 @@
  * Copyright 2022 Marek Kobida
  */
 
-export interface Cookie {
+interface Cookie {
   Domain?: string | undefined;
   HttpOnly?: boolean | undefined;
   Path?: string | undefined;

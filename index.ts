@@ -97,7 +97,7 @@ const server = http.createServer((request, response) => {
     });
   }
 
-  h.send_json(response)('');
+  h.send_json(response)('The command is not valid.');
 });
 
 server.listen(1337);
