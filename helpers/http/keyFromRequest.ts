@@ -6,28 +6,26 @@ import CookieStorage from '../CookieStorage';
 import FileStorage from '../FileStorage';
 import type http from 'http';
 
-const COOKIE_NAME = 'key';
-
-function keyFromRequest(request: http.IncomingMessage, response: http.ServerResponse): string {
+function keyFromRequest(request: Headers, response: http.ServerResponse, cookieName = 'key'): string {
   const cookieStorage = new CookieStorage();
 
-  const cookies = cookieStorage.readCookies(request.headers.cookie ?? '');
+  const cookies = cookieStorage.readCookies(request.get('Cookie') ?? '');
 
-  if (FileStorage.isValidId(cookies[COOKIE_NAME])) {
-    // cookie exists
+  // cookie exists
+  const cookie = cookies[cookieName];
 
-    return cookies[COOKIE_NAME];
-  } else {
-    // cookie does not exist
-
-    const key = FileStorage.id();
-
-    cookieStorage.writeCookie(COOKIE_NAME, key, { HttpOnly: true });
-
-    response.setHeader('Set-Cookie', cookieStorage.cookies());
-
-    return key;
+  if (FileStorage.isValidId(cookie)) {
+    return cookie;
   }
+
+  // cookie does not exist
+  const key = FileStorage.id();
+
+  cookieStorage.writeCookie(cookieName, key, { HttpOnly: true });
+
+  response.setHeader('Set-Cookie', cookieStorage.cookies());
+
+  return key;
 }
 
 export default keyFromRequest;

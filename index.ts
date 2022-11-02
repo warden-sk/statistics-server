@@ -13,12 +13,28 @@ const clientStorage = new h.ClientStorage(new h.KnownClientStorage());
 const historyStorage = new h.HistoryStorage();
 const subscriberStorage = new h.SubscriberStorage();
 
+function headersFromRequest(request: http.IncomingMessage): Headers {
+  const headers = request.headers;
+
+  const enhancedHeaders = new Headers();
+
+  for (const key in headers) {
+    const header = headers[key];
+
+    if (typeof header === 'string') {
+      enhancedHeaders.set(key, header);
+    }
+  }
+
+  return enhancedHeaders;
+}
+
 const server = http.createServer((request, response) => {
   response.setHeader('Access-Control-Allow-Credentials', 'true');
   response.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1');
   response.setHeader('Content-Type', 'application/json');
 
-  const key = h.keyFromRequest(request, response);
+  const key = h.keyFromRequest(headersFromRequest(request), response);
 
   /* (1) */ clientStorage.add({ id: key, url: request.url! });
   /* (2) */ const client = clientStorage.row(key)!;
