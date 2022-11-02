@@ -53,10 +53,10 @@ const server = http.createServer((request, response) => {
   response.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1');
   response.setHeader('Content-Type', 'application/json');
 
-  const clientId = keyFromRequest(request, response);
+  const key = keyFromRequest(request, response);
 
-  /* (1) */ clientStorage.add({ id: clientId, url: request.url! });
-  /* (2) */ const client = clientStorage.row(clientId)!;
+  /* (1) */ clientStorage.add({ id: key, url: request.url! });
+  /* (2) */ const client = clientStorage.row(key)!;
 
   if (request.headers['accept'] === 'text/event-stream') {
     response.setHeader('Content-Type', 'text/event-stream');
@@ -101,16 +101,18 @@ const server = http.createServer((request, response) => {
         }
 
         clientStorage.rows().forEach(client => {
-          const sendCommand = h.sendCommandToClient(json => clientStorage.sendMessage(client.id, json));
+          if (client.isKnown) {
+            const sendCommand = h.sendCommandToClient(json => clientStorage.sendMessage(client.id, json));
 
-          sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
-          sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
+            sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
+            sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
+          }
         });
       }
     });
   }
 
-  send_json(response)({ server: '1.0.0' });
+  send_json(response)('');
 });
 
 server.listen(1337);

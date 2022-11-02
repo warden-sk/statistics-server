@@ -2,18 +2,17 @@
  * Copyright 2022 Marek Kobida
  */
 
+import * as h from './helpers';
 import * as t from '@warden-sk/validation';
-import { CLIENT_STORAGE_ROW } from './helpers/ClientStorage';
-import { HISTORY_STORAGE_ROW } from './helpers/HistoryStorage';
 
 export const CLIENT_STORAGE_COMMAND = new t.TupleType([
   new t.LiteralType('CLIENT_STORAGE'),
-  new t.ArrayType(CLIENT_STORAGE_ROW),
+  new t.ArrayType(h.CLIENT_STORAGE_ROW),
 ]);
 
 export const HISTORY_STORAGE_COMMAND = new t.TupleType([
   new t.LiteralType('HISTORY_STORAGE'),
-  new t.ArrayType(HISTORY_STORAGE_ROW),
+  new t.ArrayType(h.HISTORY_STORAGE_ROW),
 ]);
 
 export const MESSAGE_COMMAND = new t.TupleType([

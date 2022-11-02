@@ -6,7 +6,7 @@ import * as t from '@warden-sk/validation';
 import FileStorage, { FILE_STORAGE_ROW } from './FileStorage';
 import type KnownClientStorage from './KnownClientStorage';
 import type { TypeOf } from '@warden-sk/validation/types';
-import type http from 'http';
+import type stream from 'stream';
 
 export const CLIENT_STORAGE_ROW = new t.IntersectionType([
   FILE_STORAGE_ROW,
@@ -21,7 +21,7 @@ interface EnhancedClient extends TypeOf<typeof CLIENT_STORAGE_ROW> {
 }
 
 class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
-  wss: { [id: string]: http.ServerResponse | undefined } = {};
+  wss: { [id: string]: stream.Writable | undefined } = {};
 
   constructor(readonly knownClientStorage: KnownClientStorage) {
     super('./json/ClientStorage.json', CLIENT_STORAGE_ROW);
