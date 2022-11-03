@@ -26,7 +26,12 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
   }
 
   #writeFile(on: (rows: Row[]) => Row[]) {
-    pipe(on(this.#readFile()), json_encode, chainW(write_file(this.filePath)));
+    pipe(
+      on(this.#readFile()),
+      new t.ArrayType(this.type).decode,
+      chainW(json_encode),
+      chainW(write_file(this.filePath))
+    );
   }
 
   add(row: Omit<Row, 'createdAt' | 'updatedAt'>) {
@@ -47,7 +52,7 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
     return /[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}/;
   }
 
-  static isValidId(id?: string | undefined): id is string {
+  static isValidId(id?: string): id is string {
     return typeof id === 'string' && FileStorage.idPattern().test(id);
   }
 
@@ -65,7 +70,7 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
     return this.#readFile();
   }
 
-  update(id: string, json: { [K in keyof Row]?: Row[K] | undefined }) {
+  update(id: string, json: { [K in keyof Row]?: Row[K] }) {
     this.#writeFile(rows =>
       rows.map(row => {
         if (row.id === id) {
