@@ -5,16 +5,18 @@
 import CookieStorage from '../CookieStorage';
 import FileStorage from '../FileStorage';
 
-function keyFromRequest(i: Headers, o: Headers, cookieName = 'key'): string {
+function keyFromRequest(i: Headers, o: Headers, cookieName = 'key'): [string, string] {
   const cookieStorage = new CookieStorage();
 
-  const cookies = cookieStorage.readCookies(i.get('Cookie') ?? '');
+  const windowId = FileStorage.id();
+  cookieStorage.writeCookie('windowId', windowId, { HttpOnly: true });
 
   // cookie exists
+  const cookies = cookieStorage.readCookies(i.get('Cookie') ?? '');
   const cookie = cookies[cookieName];
 
   if (FileStorage.isValidId(cookie)) {
-    return cookie;
+    return [cookie, windowId];
   }
 
   // cookie does not exist
@@ -24,7 +26,7 @@ function keyFromRequest(i: Headers, o: Headers, cookieName = 'key'): string {
 
   cookieStorage.cookies().forEach(cookie => o.append('Set-Cookie', cookie));
 
-  return key;
+  return [key, windowId];
 }
 
 export default keyFromRequest;

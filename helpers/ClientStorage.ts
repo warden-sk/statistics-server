@@ -8,13 +8,6 @@ import type KnownClientStorage from './KnownClientStorage';
 import type { TypeOf } from '@warden-sk/validation/types';
 import type stream from 'stream';
 
-export const CLIENT_STORAGE_ROW = new t.IntersectionType([
-  FILE_STORAGE_ROW,
-  new t.InterfaceType({
-    url: new t.StringType(),
-  }),
-]);
-
 interface EnhancedClient extends TypeOf<typeof CLIENT_STORAGE_ROW> {
   isKnown: boolean;
   name?: string | undefined;
@@ -51,5 +44,12 @@ class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
     this.wss[id]?.write(`data: ${json}\n\n`);
   }
 }
+
+export const CLIENT_STORAGE_ROW = new t.IntersectionType([
+  FILE_STORAGE_ROW,
+  new t.InterfaceType({
+    url: new t.StringType(),
+  }),
+]);
 
 export default ClientStorage;

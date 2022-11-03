@@ -12,12 +12,6 @@ import crypto from 'crypto';
 import messages from './messages';
 import pipe from '@warden-sk/validation/pipe';
 
-export const FILE_STORAGE_ROW = new t.InterfaceType({
-  createdAt: new t.NumberType(),
-  id: new t.StringType(),
-  updatedAt: new t.NumberType(),
-});
-
 class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
   constructor(readonly filePath: string, readonly type: Type<Row>) {}
 
@@ -49,8 +43,12 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
     return crypto.randomUUID();
   }
 
+  static idPattern(): RegExp {
+    return /[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}/;
+  }
+
   static isValidId(id?: string | undefined): id is string {
-    return typeof id === 'string' && /[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}/.test(id);
+    return typeof id === 'string' && FileStorage.idPattern().test(id);
   }
 
   row(id: string): Row | undefined {
@@ -86,5 +84,11 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
     );
   }
 }
+
+export const FILE_STORAGE_ROW = new t.InterfaceType({
+  createdAt: new t.NumberType(),
+  id: new t.StringType({ pattern: FileStorage.idPattern() }),
+  updatedAt: new t.NumberType(),
+});
 
 export default FileStorage;

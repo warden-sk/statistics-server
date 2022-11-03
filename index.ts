@@ -36,7 +36,7 @@ const server = http.createServer((request, response) => {
     'Content-Type': 'application/json',
   });
 
-  const key = h.keyFromRequest(headersFromRequest(request), headers);
+  const [key, windowId] = h.keyFromRequest(headersFromRequest(request), headers);
 
   [...headers].forEach(([l, r]) => response.setHeader(l, r));
 
@@ -90,7 +90,7 @@ const server = http.createServer((request, response) => {
         if (commandName === 'UPDATE') {
           clientStorage.update(client.id, json);
 
-          historyStorage.add({ clientId: client.id, message: undefined, url: json.url });
+          historyStorage.add({ clientId: client.id, message: undefined, url: json.url, windowId });
         }
 
         clientStorage.rows().forEach(client => {
@@ -114,7 +114,9 @@ server.listen(1337);
 
 (['SIGINT', 'SIGTERM'] as const).forEach(signal =>
   process.on(signal, () => {
-    historyStorage.add({ clientId: '00000000-0000-0000-0000-000000000000', message: signal, url: undefined });
+    const id = '00000000-0000-0000-0000-000000000000';
+
+    historyStorage.add({ clientId: id, message: signal, url: undefined, windowId: id });
 
     process.exit();
   })
