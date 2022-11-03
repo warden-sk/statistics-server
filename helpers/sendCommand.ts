@@ -4,11 +4,11 @@
 
 import { chainW, right } from '@warden-sk/validation/Either';
 import type { Either } from '@warden-sk/validation/Either';
-import type Type from '@warden-sk/validation/Type';
+import type Type from '@warden-sk/validation/helpers/Type';
 import type { TypeOf } from '@warden-sk/validation/types';
 import commandsFromClient from '../commandsFromClient';
 import commandsFromServer from '../commandsFromServer';
-import { json_encode } from '@warden-sk/validation/json';
+import { json_encode } from '@warden-sk/validation/helpers/json';
 import pipe from '@warden-sk/validation/pipe';
 
 function sendCommand<Of extends Type<any>>(

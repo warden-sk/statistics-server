@@ -4,7 +4,7 @@
 
 import { chainW, right } from '@warden-sk/validation/Either';
 import type { Either } from '@warden-sk/validation/Either';
-import { json_encode } from '@warden-sk/validation/json';
+import { json_encode } from '@warden-sk/validation/helpers/json';
 import pipe from '@warden-sk/validation/pipe';
 import type stream from 'stream';
 
