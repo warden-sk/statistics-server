@@ -48,15 +48,15 @@ const server = http.createServer((request, response) => {
   [...headers].forEach(([l, r]) => response.setHeader(l, r));
 
   /* (1) */ clientStorage.add({ id: key, url: request.url! });
-  /* (2) */ const client = clientStorage.row(key)!;
+  /* (2) */ const currentClient = clientStorage.row(key)!;
 
   if (request.headers['accept'] === 'text/event-stream') {
     response.setHeader('Content-Type', 'text/event-stream');
 
-    $[client.id] = response;
+    $[currentClient.id] = response;
 
     request.on('close', () => {
-      delete $[client.id];
+      delete $[currentClient.id];
     });
 
     return;
@@ -97,18 +97,16 @@ const server = http.createServer((request, response) => {
         }
 
         if (commandName === 'UPDATE') {
-          clientStorage.update(client.id, json);
+          clientStorage.update(currentClient.id, json);
 
-          historyStorage.add({ clientId: client.id, message: undefined, ...json });
+          historyStorage.add({ clientId: currentClient.id, message: undefined, ...json });
         }
 
         clientStorage.rows().forEach(client => {
-          if (client.isKnown) {
-            const sendCommand = h.sendCommandToClient(json => writeMessage(client.id, json));
+          const sendCommand = h.sendCommandToClient(json => writeMessage(client.id, json));
 
-            sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
-            sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
-          }
+          sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
+          sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
         });
       }
 
