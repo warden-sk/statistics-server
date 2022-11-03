@@ -36,6 +36,17 @@ function writeMessage(id: string, json: string) {
   $[id]?.write(`data: ${json}\n\n`);
 }
 
+/**/
+
+function update() {
+  clientStorage.rows().forEach(client => {
+    const sendCommand = h.sendCommandToClient(json => writeMessage(client.id, json));
+
+    sendCommand(['CLIENT_STORAGE', clientStorage.rows().map(row => ({ ...row, isActive: $[row.id] !== undefined }))]);
+    sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
+  });
+}
+
 const server = http.createServer((request, response) => {
   const headers = new Headers({
     'Access-Control-Allow-Credentials': 'true',
@@ -59,6 +70,10 @@ const server = http.createServer((request, response) => {
       delete $[currentClient.id];
     });
 
+    /**/
+
+    update();
+
     return;
   }
 
@@ -81,8 +96,6 @@ const server = http.createServer((request, response) => {
       if (isRight(command)) {
         const [commandName, json] = command.right;
 
-        console.log(`[${commandName}]`, json);
-
         if (commandName === 'MESSAGE') {
           clientStorage.rows().forEach(client => {
             h.sendCommandToClient(json => writeMessage(client.id, json))([
@@ -102,12 +115,9 @@ const server = http.createServer((request, response) => {
           historyStorage.add({ clientId: currentClient.id, message: undefined, ...json });
         }
 
-        clientStorage.rows().forEach(client => {
-          const sendCommand = h.sendCommandToClient(json => writeMessage(client.id, json));
+        /**/
 
-          sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
-          sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
-        });
+        update();
       }
 
       return h.send_json(response)(h.messages.REQUEST_VALID);

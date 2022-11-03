@@ -7,7 +7,16 @@ import * as t from '@warden-sk/validation';
 
 const CLIENT_STORAGE_COMMAND = new t.TupleType([
   new t.LiteralType('CLIENT_STORAGE'),
-  new t.ArrayType(h.CLIENT_STORAGE_ROW),
+  new t.ArrayType(
+    new t.IntersectionType([
+      h.CLIENT_STORAGE_ROW,
+      new t.InterfaceType({
+        isActive: new t.BooleanType(),
+        isKnown: new t.BooleanType(),
+        // name: new t.UnionType([new t.StringType(), new t.UndefinedType()]), // dokončiť
+      }),
+    ])
+  ),
 ]);
 
 const HISTORY_STORAGE_COMMAND = new t.TupleType([
