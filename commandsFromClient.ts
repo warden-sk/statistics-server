@@ -3,6 +3,7 @@
  */
 
 import * as t from '@warden-sk/validation';
+import FileStorage from './helpers/FileStorage';
 
 const MESSAGE_COMMAND = new t.TupleType([
   new t.LiteralType('MESSAGE'),
@@ -22,6 +23,7 @@ const UPDATE_COMMAND = new t.TupleType([
   new t.LiteralType('UPDATE'),
   new t.InterfaceType({
     url: new t.StringType(),
+    windowId: new t.StringType({ pattern: FileStorage.idPattern() }),
   }),
 ]);
 
