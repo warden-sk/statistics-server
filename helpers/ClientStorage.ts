@@ -10,7 +10,7 @@ import type stream from 'stream';
 
 interface EnhancedClient extends TypeOf<typeof CLIENT_STORAGE_ROW> {
   isKnown: boolean;
-  name?: string | undefined;
+  name?: string;
 }
 
 class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {

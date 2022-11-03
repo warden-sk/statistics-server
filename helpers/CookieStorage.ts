@@ -3,11 +3,11 @@
  */
 
 interface Cookie {
-  Domain?: string | undefined;
-  HttpOnly?: boolean | undefined;
-  Path?: string | undefined;
-  SameSite?: 'Lax' | 'None' | 'Strict' | undefined;
-  Secure?: boolean | undefined;
+  Domain?: string;
+  HttpOnly?: boolean;
+  Path?: string;
+  SameSite?: 'Lax' | 'None' | 'Strict';
+  Secure?: boolean;
 }
 
 class CookieStorage {
