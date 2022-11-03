@@ -5,7 +5,6 @@
 import * as t from '@warden-sk/validation';
 import FileStorage, { FILE_STORAGE_ROW } from './FileStorage';
 import type KnownClientStorage from './KnownClientStorage';
-import type stream from 'stream';
 
 interface EnhancedClient extends t.TypeOf<typeof CLIENT_STORAGE_ROW> {
   isKnown: boolean;
@@ -13,8 +12,6 @@ interface EnhancedClient extends t.TypeOf<typeof CLIENT_STORAGE_ROW> {
 }
 
 class ClientStorage extends FileStorage<t.TypeOf<typeof CLIENT_STORAGE_ROW>> {
-  wss: { [id: string]: stream.Writable | undefined } = {};
-
   constructor(readonly knownClientStorage: KnownClientStorage) {
     super('./json/ClientStorage.json', CLIENT_STORAGE_ROW);
   }
@@ -37,10 +34,6 @@ class ClientStorage extends FileStorage<t.TypeOf<typeof CLIENT_STORAGE_ROW>> {
       isKnown: this.knownClientStorage.has(client.id),
       name: this.knownClientStorage.row(client.id)?.name,
     }));
-  }
-
-  sendMessage(id: string, json: string) {
-    this.wss[id]?.write(`data: ${json}\n\n`);
   }
 }
 

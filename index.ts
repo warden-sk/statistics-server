@@ -8,6 +8,7 @@ import commandsFromClient from './commandsFromClient';
 import http from 'http';
 import { json_decode } from '@warden-sk/validation/json';
 import pipe from '@warden-sk/validation/pipe';
+import type stream from 'stream';
 
 const clientStorage = new h.ClientStorage(new h.KnownClientStorage());
 const historyStorage = new h.HistoryStorage();
@@ -29,6 +30,12 @@ function headersFromRequest(request: http.IncomingMessage): Headers {
   return enhancedHeaders;
 }
 
+const $: { [id: string]: stream.Writable | undefined } = {};
+
+function writeMessage(id: string, json: string) {
+  $[id]?.write(`data: ${json}\n\n`);
+}
+
 const server = http.createServer((request, response) => {
   const headers = new Headers({
     'Access-Control-Allow-Credentials': 'true',
@@ -46,10 +53,10 @@ const server = http.createServer((request, response) => {
   if (request.headers['accept'] === 'text/event-stream') {
     response.setHeader('Content-Type', 'text/event-stream');
 
-    clientStorage.wss[client.id] = response;
+    $[client.id] = response;
 
     request.on('close', () => {
-      delete clientStorage.wss[client.id];
+      delete $[client.id];
     });
 
     return;
@@ -76,9 +83,9 @@ const server = http.createServer((request, response) => {
 
         if (commandName === 'MESSAGE') {
           clientStorage.rows().forEach(client => {
-            h.sendCommandToClient(json => clientStorage.sendMessage(client.id, json))([
+            h.sendCommandToClient(json => writeMessage(client.id, json))([
               'MESSAGE',
-              { createdAt: +new Date(), message: json.message },
+              { createdAt: +new Date(), ...json },
             ]);
           });
         }
@@ -90,12 +97,12 @@ const server = http.createServer((request, response) => {
         if (commandName === 'UPDATE') {
           clientStorage.update(client.id, json);
 
-          historyStorage.add({ clientId: client.id, message: undefined, url: json.url, windowId: json.windowId });
+          historyStorage.add({ clientId: client.id, message: undefined, ...json });
         }
 
         clientStorage.rows().forEach(client => {
           if (client.isKnown) {
-            const sendCommand = h.sendCommandToClient(json => clientStorage.sendMessage(client.id, json));
+            const sendCommand = h.sendCommandToClient(json => writeMessage(client.id, json));
 
             sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
             sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
