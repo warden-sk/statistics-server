@@ -18,8 +18,8 @@ const HISTORY_STORAGE_COMMAND = new t.TupleType([
 const MESSAGE_COMMAND = new t.TupleType([
   new t.LiteralType('MESSAGE'),
   new t.InterfaceType({
-    createdAt: new t.NumberType(),
-    message: new t.StringType(),
+    createdAt: new t.NumberType(), // dokončiť "pattern"
+    message: new t.StringType(), // dokončiť "pattern"
   }),
 ]);
 

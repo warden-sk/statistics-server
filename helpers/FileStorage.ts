@@ -91,9 +91,9 @@ class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
 }
 
 export const FILE_STORAGE_ROW = new t.InterfaceType({
-  createdAt: new t.NumberType(),
+  createdAt: new t.NumberType(), // dokončiť "pattern"
   id: new t.StringType({ pattern: FileStorage.idPattern() }),
-  updatedAt: new t.NumberType(),
+  updatedAt: new t.NumberType(), // dokončiť "pattern"
 });
 
 export default FileStorage;
