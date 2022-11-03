@@ -81,6 +81,8 @@ const server = http.createServer((request, response) => {
       if (isRight(command)) {
         const [commandName, json] = command.right;
 
+        console.log(`[${commandName}]`, json);
+
         if (commandName === 'MESSAGE') {
           clientStorage.rows().forEach(client => {
             h.sendCommandToClient(json => writeMessage(client.id, json))([
