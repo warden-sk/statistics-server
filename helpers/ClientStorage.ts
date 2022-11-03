@@ -5,15 +5,14 @@
 import * as t from '@warden-sk/validation';
 import FileStorage, { FILE_STORAGE_ROW } from './FileStorage';
 import type KnownClientStorage from './KnownClientStorage';
-import type { TypeOf } from '@warden-sk/validation/types';
 import type stream from 'stream';
 
-interface EnhancedClient extends TypeOf<typeof CLIENT_STORAGE_ROW> {
+interface EnhancedClient extends t.TypeOf<typeof CLIENT_STORAGE_ROW> {
   isKnown: boolean;
   name?: string;
 }
 
-class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
+class ClientStorage extends FileStorage<t.TypeOf<typeof CLIENT_STORAGE_ROW>> {
   wss: { [id: string]: stream.Writable | undefined } = {};
 
   constructor(readonly knownClientStorage: KnownClientStorage) {
@@ -48,7 +47,7 @@ class ClientStorage extends FileStorage<TypeOf<typeof CLIENT_STORAGE_ROW>> {
 export const CLIENT_STORAGE_ROW = new t.IntersectionType([
   FILE_STORAGE_ROW,
   new t.InterfaceType({
-    url: new t.StringType(),
+    url: new t.StringType(), // dokončiť "pattern"
   }),
 ]);
 

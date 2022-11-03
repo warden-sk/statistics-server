@@ -7,12 +7,11 @@ import { chainW, isRight } from '@warden-sk/validation/Either';
 import { json_decode, json_encode } from '@warden-sk/validation/json';
 import { read_file, write_file } from '@warden-sk/validation/file';
 import type Type from '@warden-sk/validation/Type';
-import type { TypeOf } from '@warden-sk/validation/types';
 import crypto from 'crypto';
 import messages from './messages';
 import pipe from '@warden-sk/validation/pipe';
 
-class FileStorage<Row extends TypeOf<typeof FILE_STORAGE_ROW>> {
+class FileStorage<Row extends t.TypeOf<typeof FILE_STORAGE_ROW>> {
   constructor(readonly filePath: string, readonly type: Type<Row>) {}
 
   #readFile(): Row[] {

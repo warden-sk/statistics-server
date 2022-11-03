@@ -2,15 +2,24 @@
  * Copyright 2022 Marek Kobida
  */
 
+import * as t from '@warden-sk/validation';
 import FileStorage, { FILE_STORAGE_ROW } from './FileStorage';
-import type { TypeOf } from '@warden-sk/validation/types';
 
-class SubscriberStorage extends FileStorage<TypeOf<typeof SUBSCRIBER_STORAGE_ROW>> {
+class SubscriberStorage extends FileStorage<t.TypeOf<typeof SUBSCRIBER_STORAGE_ROW>> {
   constructor() {
     super('./json/SubscriberStorage.json', SUBSCRIBER_STORAGE_ROW);
   }
+
+  add(row: Omit<t.TypeOf<typeof SUBSCRIBER_STORAGE_ROW>, keyof t.TypeOf<typeof FILE_STORAGE_ROW>>) {
+    super.add({ ...row, id: FileStorage.id() });
+  }
 }
 
-export const SUBSCRIBER_STORAGE_ROW = FILE_STORAGE_ROW;
+export const SUBSCRIBER_STORAGE_ROW = new t.IntersectionType([
+  FILE_STORAGE_ROW,
+  new t.InterfaceType({
+    'e-mail': new t.StringType(), // dokončiť "pattern"
+  }),
+]);
 
 export default SubscriberStorage;

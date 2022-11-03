@@ -84,7 +84,7 @@ const server = http.createServer((request, response) => {
         }
 
         if (commandName === 'SUBSCRIBE') {
-          subscriberStorage.add({ id: json['e-mail'] });
+          subscriberStorage.add(json);
         }
 
         if (commandName === 'UPDATE') {
