@@ -4,8 +4,8 @@
 
 interface Cookie {
   Domain?: string;
-  Expires?: Date;
   HttpOnly?: boolean;
+  'Max-Age'?: number;
   Path?: string;
   SameSite?: 'Lax' | 'None' | 'Strict';
   Secure?: boolean;
@@ -22,12 +22,12 @@ class CookieStorage {
         $ += `; Domain=${cookie.Domain}`;
       }
 
-      if (cookie.Expires) {
-        $ += `; Expires=${cookie.Expires}`;
-      }
-
       if (cookie.HttpOnly) {
         $ += '; HttpOnly';
+      }
+
+      if (cookie['Max-Age']) {
+        $ += `; Max-Age=${cookie['Max-Age']}`;
       }
 
       if (cookie.Path) {

@@ -20,8 +20,8 @@ function keyFromRequest(i: Headers, o: Headers, cookieName = 'key'): string {
   const key = FileStorage.id();
 
   cookieStorage.writeCookie(cookieName, key, {
-    Expires: new Date(new Date().setFullYear(new Date().getFullYear() + 100)),
     HttpOnly: true,
+    'Max-Age': 315360000, // 10 rokov
   });
 
   cookieStorage.cookies().forEach(cookie => o.append('Set-Cookie', cookie));
