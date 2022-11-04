@@ -7,6 +7,7 @@ import FileStorage, { FILE_STORAGE_ROW } from './FileStorage';
 import type KnownClientStorage from './KnownClientStorage';
 
 interface EnhancedClient extends t.TypeOf<typeof CLIENT_STORAGE_ROW> {
+  isActive: boolean;
   isKnown: boolean;
   name: string;
 }
@@ -22,6 +23,7 @@ class ClientStorage extends FileStorage<t.TypeOf<typeof CLIENT_STORAGE_ROW>> {
     if (client) {
       return {
         ...client,
+        isActive: (+new Date() - client.updatedAt) / 1000 < 60,
         isKnown: this.knownClientStorage.has(client.id),
         name: this.knownClientStorage.row(client.id)?.name ?? client.id,
       };
@@ -31,6 +33,7 @@ class ClientStorage extends FileStorage<t.TypeOf<typeof CLIENT_STORAGE_ROW>> {
   rows(): EnhancedClient[] {
     return super.rows().map(client => ({
       ...client,
+      isActive: (+new Date() - client.updatedAt) / 1000 < 60,
       isKnown: this.knownClientStorage.has(client.id),
       name: this.knownClientStorage.row(client.id)?.name ?? client.id,
     }));

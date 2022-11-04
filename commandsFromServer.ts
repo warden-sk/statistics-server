@@ -11,6 +11,7 @@ const CLIENT_STORAGE_COMMAND = new t.TupleType([
     new t.IntersectionType([
       h.CLIENT_STORAGE_ROW,
       new t.InterfaceType({
+        isActive: new t.BooleanType(),
         isKnown: new t.BooleanType(),
         name: new t.UnionType([new t.StringType(), new t.UndefinedType()]), // dokončiť
       }),
