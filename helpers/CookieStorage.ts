@@ -4,6 +4,7 @@
 
 interface Cookie {
   Domain?: string;
+  Expires?: Date;
   HttpOnly?: boolean;
   Path?: string;
   SameSite?: 'Lax' | 'None' | 'Strict';
@@ -19,6 +20,10 @@ class CookieStorage {
 
       if (cookie.Domain) {
         $ += `; Domain=${cookie.Domain}`;
+      }
+
+      if (cookie.Expires) {
+        $ += `; Expires=${cookie.Expires}`;
       }
 
       if (cookie.HttpOnly) {

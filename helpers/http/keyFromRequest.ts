@@ -19,7 +19,10 @@ function keyFromRequest(i: Headers, o: Headers, cookieName = 'key'): string {
   // cookie does not exist
   const key = FileStorage.id();
 
-  cookieStorage.writeCookie(cookieName, key, { HttpOnly: true });
+  cookieStorage.writeCookie(cookieName, key, {
+    Expires: new Date(new Date().setFullYear(new Date().getFullYear() + 100)),
+    HttpOnly: true,
+  });
 
   cookieStorage.cookies().forEach(cookie => o.append('Set-Cookie', cookie));
 
