@@ -8,7 +8,7 @@ import type KnownClientStorage from './KnownClientStorage';
 
 interface EnhancedClient extends t.TypeOf<typeof CLIENT_STORAGE_ROW> {
   isKnown: boolean;
-  name?: string;
+  name: string;
 }
 
 class ClientStorage extends FileStorage<t.TypeOf<typeof CLIENT_STORAGE_ROW>> {
@@ -23,7 +23,7 @@ class ClientStorage extends FileStorage<t.TypeOf<typeof CLIENT_STORAGE_ROW>> {
       return {
         ...client,
         isKnown: this.knownClientStorage.has(client.id),
-        name: this.knownClientStorage.row(client.id)?.name,
+        name: this.knownClientStorage.row(client.id)?.name ?? client.id,
       };
     }
   }
@@ -32,7 +32,7 @@ class ClientStorage extends FileStorage<t.TypeOf<typeof CLIENT_STORAGE_ROW>> {
     return super.rows().map(client => ({
       ...client,
       isKnown: this.knownClientStorage.has(client.id),
-      name: this.knownClientStorage.row(client.id)?.name,
+      name: this.knownClientStorage.row(client.id)?.name ?? client.id,
     }));
   }
 }

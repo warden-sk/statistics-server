@@ -42,7 +42,7 @@ function update() {
   clientStorage.rows().forEach(client => {
     const sendCommand = h.sendCommandToClient(json => writeMessage(client.id, json));
 
-    sendCommand(['CLIENT_STORAGE', clientStorage.rows().map(row => ({ ...row, isActive: $[row.id] !== undefined }))]);
+    sendCommand(['CLIENT_STORAGE', clientStorage.rows()]);
     sendCommand(['HISTORY_STORAGE', historyStorage.rows()]);
   });
 }
