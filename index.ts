@@ -3,7 +3,7 @@
  */
 
 import * as h from './helpers';
-import { chainW, isLeft, isRight } from '@warden-sk/validation/Either';
+import { chainW, isLeft, isRight } from '@warden-sk/validation/either';
 import commandsFromClient from './commandsFromClient';
 import http from 'http';
 import { json_decode } from '@warden-sk/validation/helpers/json';

@@ -2,8 +2,8 @@
  * Copyright 2022 Marek Kobida
  */
 
-import { chainW, right } from '@warden-sk/validation/Either';
-import type { Either } from '@warden-sk/validation/Either';
+import { chainW, right } from '@warden-sk/validation/either';
+import type { Either } from '@warden-sk/validation/either';
 import type Type from '@warden-sk/validation/helpers/Type';
 import type { TypeOf } from '@warden-sk/validation/types';
 import commandsFromClient from '../commandsFromClient';
