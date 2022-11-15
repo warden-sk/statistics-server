@@ -15,13 +15,13 @@ class HistoryStorage extends FileStorage<t.TypeOf<typeof HISTORY_STORAGE_ROW>> {
   }
 }
 
-export const HISTORY_STORAGE_ROW = new t.IntersectionType([
+export const HISTORY_STORAGE_ROW = t.intersection([
   FILE_STORAGE_ROW,
-  new t.InterfaceType({
-    clientId: new t.StringType({ pattern: FileStorage.idPattern() }),
-    message: new t.UnionType([new t.StringType(), new t.UndefinedType()]), // dokončiť "pattern"
-    url: new t.UnionType([new t.StringType(), new t.UndefinedType()]), // dokončiť "pattern"
-    windowId: new t.StringType({ pattern: FileStorage.idPattern() }),
+  t.interface({
+    clientId: t.string({ pattern: FileStorage.idPattern() }),
+    message: t.union([t.string(), t.undefined]), // dokončiť "pattern"
+    url: t.union([t.string(), t.undefined]), // dokončiť "pattern"
+    windowId: t.string({ pattern: FileStorage.idPattern() }),
   }),
 ]);
 

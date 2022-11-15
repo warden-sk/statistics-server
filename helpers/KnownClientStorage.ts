@@ -11,10 +11,10 @@ class KnownClientStorage extends FileStorage<t.TypeOf<typeof KNOWN_CLIENT_STORAG
   }
 }
 
-export const KNOWN_CLIENT_STORAGE_ROW = new t.IntersectionType([
+export const KNOWN_CLIENT_STORAGE_ROW = t.intersection([
   FILE_STORAGE_ROW,
-  new t.InterfaceType({
-    name: new t.StringType(), // dokončiť "pattern"
+  t.interface({
+    name: t.string(), // dokončiť "pattern"
   }),
 ]);
 

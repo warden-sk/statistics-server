@@ -40,10 +40,10 @@ class ClientStorage extends FileStorage<t.TypeOf<typeof CLIENT_STORAGE_ROW>> {
   }
 }
 
-export const CLIENT_STORAGE_ROW = new t.IntersectionType([
+export const CLIENT_STORAGE_ROW = t.intersection([
   FILE_STORAGE_ROW,
-  new t.InterfaceType({
-    url: new t.StringType(), // dokončiť "pattern"
+  t.interface({
+    url: t.string(), // dokončiť "pattern"
   }),
 ]);
 

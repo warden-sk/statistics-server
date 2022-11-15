@@ -15,7 +15,7 @@ class FileStorage<Row extends t.TypeOf<typeof FILE_STORAGE_ROW>> {
   constructor(readonly filePath: string, readonly type: Type<Row>) {}
 
   #readFile(): Row[] {
-    const json = pipe(read_file(this.filePath), chainW(json_decode), chainW(new t.ArrayType(this.type).decode));
+    const json = pipe(read_file(this.filePath), chainW(json_decode), chainW(t.array(this.type).decode));
 
     if (isRight(json)) {
       return json.right;
@@ -25,12 +25,7 @@ class FileStorage<Row extends t.TypeOf<typeof FILE_STORAGE_ROW>> {
   }
 
   #writeFile(on: (rows: Row[]) => Row[]) {
-    pipe(
-      on(this.#readFile()),
-      new t.ArrayType(this.type).decode,
-      chainW(json_encode),
-      chainW(write_file(this.filePath))
-    );
+    pipe(on(this.#readFile()), t.array(this.type).decode, chainW(json_encode), chainW(write_file(this.filePath)));
   }
 
   add(row: Omit<Row, 'createdAt' | 'updatedAt'>) {
@@ -89,10 +84,10 @@ class FileStorage<Row extends t.TypeOf<typeof FILE_STORAGE_ROW>> {
   }
 }
 
-export const FILE_STORAGE_ROW = new t.InterfaceType({
-  createdAt: new t.NumberType(), // dokončiť "pattern"
-  id: new t.StringType({ pattern: FileStorage.idPattern() }),
-  updatedAt: new t.NumberType(), // dokončiť "pattern"
+export const FILE_STORAGE_ROW = t.interface({
+  createdAt: t.number, // dokončiť "pattern"
+  id: t.string({ pattern: FileStorage.idPattern() }),
+  updatedAt: t.number, // dokončiť "pattern"
 });
 
 export default FileStorage;

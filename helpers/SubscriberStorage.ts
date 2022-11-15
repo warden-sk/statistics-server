@@ -15,10 +15,10 @@ class SubscriberStorage extends FileStorage<t.TypeOf<typeof SUBSCRIBER_STORAGE_R
   }
 }
 
-export const SUBSCRIBER_STORAGE_ROW = new t.IntersectionType([
+export const SUBSCRIBER_STORAGE_ROW = t.intersection([
   FILE_STORAGE_ROW,
-  new t.InterfaceType({
-    'e-mail': new t.StringType(), // dokončiť "pattern"
+  t.interface({
+    'e-mail': t.string(), // dokončiť "pattern"
   }),
 ]);
 
