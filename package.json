@@ -1,8 +1,8 @@
 {
   "devDependencies": {
-    "@types/node": "^18.11.12",
-    "@typescript-eslint/eslint-plugin": "^5.46.0",
-    "@typescript-eslint/parser": "^5.46.0",
+    "@types/node": "^18.11.15",
+    "@typescript-eslint/eslint-plugin": "^5.46.1",
+    "@typescript-eslint/parser": "^5.46.1",
     "@warden-sk/eslint-config": "file:../eslint-config",
     "@warden-sk/validation": "file:../validation",
     "eslint": "^8.29.0",
