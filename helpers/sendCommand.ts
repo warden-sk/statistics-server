@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Marek Kobida
+ * Copyright 2023 Marek Kobida
  */
 
 import { chainW, right } from '@warden-sk/validation/either';
